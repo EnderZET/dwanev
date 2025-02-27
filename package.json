@@ -6,7 +6,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon main.js",
     "tailwind:css": "npx tailwindcss -i ./src/tailwind.css -o ./public/styles/styles.css --watch",
-    "build": "netlify deploy --prod"
   },
   "author": "",
   "license": "ISC",
