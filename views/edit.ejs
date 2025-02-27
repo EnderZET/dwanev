@@ -1,0 +1,105 @@
+<%- include("layout/header") %>
+<body class="bg-gradient-to-b from-cyan-100 to-teal-50 p-0 m-0 md:h-full md:w-full">
+    <img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full">
+<div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+  <div class="bg-white shadow-lg rounded-lg p-6 w-full max-w-2xl">
+    <h2 class="text-2xl font-bold mb-4 text-gray-700">Edit Data</h2>
+
+    <form action="/edit/<%= data.uid %>" method="POST" class="space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <!-- UID -->
+      <div>
+        <label class="block text-gray-600">UID</label>
+        <input
+          type="text"
+          name="uid"
+          value="<%= data.uid %>"
+          readonly
+          class="w-full px-3 py-2 border rounded bg-gray-100 text-gray-500 cursor-not-allowed"
+        />
+      </div>
+
+      <!-- Nama Laporan -->
+      <div>
+        <label class="block text-gray-600">Nama Laporan</label>
+        <input
+          type="text"
+          name="reportTitle"
+          value="<%= data.reportTitle %>"
+          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Waktu Kejadian -->
+      <div>
+        <label class="block text-gray-600">Waktu Kejadian</label>
+        <input
+          type="date"
+          name="knownTimeHappened"
+          value="<%= data.knownTimeHappened %>"
+          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Terdakwa -->
+      <div>
+        <label class="block text-gray-600">Terdakwa</label>
+        <input
+          type="text"
+          name="reportGuilties"
+          value="<%= data.reportGuilties %>"
+          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Pelapor -->
+      <div>
+        <label class="block text-gray-600">Pelapor</label>
+        <input
+          type="text"
+          name="reportAgent"
+          value="<%= data.reportAgent %>"
+          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Alasan -->
+      <div>
+        <label class="block text-gray-600">Alasan</label>
+        <textarea
+          name="reportTypesAndCauses"
+          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        ><%= data.reportTypesAndCauses %></textarea>
+      </div>
+
+      <!-- Dropdown Situasi -->
+      <div>
+        <label class="block text-gray-600">Situasi</label>
+        <select name="situation" class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="1" <%= Number(data.uid.split('/')[2]) === 1 ? 'selected' : '' %>>🟢 Laporan Normal</option>
+            <option value="2" <%= Number(data.uid.split('/')[2]) === 2 ? 'selected' : '' %>>🟠 Laporan Perlu Perhatian</option>
+            <option value="3" <%= Number(data.uid.split('/')[2]) === 3 ? 'selected' : '' %>>🔴 Laporan Darurat</option>
+            <option value="4" <%= Number(data.uid.split('/')[2]) === 4 ? 'selected' : '' %>>⚠️ Perlu Atensi Tim Inti</option>
+            <option value="5" <%= Number(data.uid.split('/')[2]) === 5 ? 'selected' : '' %>>🔵 Perlu Atensi Pratama/i</option>
+            </option>
+
+        </select>
+      </div>
+
+      <!-- Checkbox Saat Pramuka -->
+      <div class="flex items-center">
+        <input type="checkbox" name="isScoutEvent" id="isScoutEvent"
+        class="mr-2" <%= data.isScoutEvent ? 'checked' : '' %>>
+        <label for="isScoutEvent" class="text-sm font-medium">Saat Pramuka?</label>
+      </div>
+
+      <!-- Tombol Submit -->
+      <div class="flex justify-end space-x-2">
+        <a href="/dashboard" class="px-4 py-2 bg-gray-300 text-gray-700 rounded no-underline hover:bg-gray-400 transition">Batal</a>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+          Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

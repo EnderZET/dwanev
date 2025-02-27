@@ -1,0 +1,127 @@
+<%
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString("id-ID", { 
+        year: "numeric", 
+        month: "long", 
+        day: "numeric", 
+        hour: "2-digit", 
+        minute: "2-digit", 
+        second: "2-digit" 
+    });
+}
+
+
+%>
+<%- include('layout/header.ejs') %>
+<%- include('layout/headers/bodyOverflow.ejs') %>
+<%- include('layout/navs') %> 
+<%- include('layout/dropdown') %>
+    <div class="bg-white/70 backdrop-blur-mds shadow-lg rounded-lg p-6 w-full max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-700 text-center mb-4">Ringkasan Laporan</h1>
+
+        <div class="mb-4">
+            <label class="block text-gray-600 text-sm font-semibold mb-2">Pilih Pertemuan</label>
+            <select id="pertemuanSelector" class="w-full p-2 border rounded">
+                <% ringkasan.forEach(r => { %>
+                    <option value="<%= r.udt %>-<%= r.udtMonth %>-<%= r.udtYear %>">
+                        Pertemuan <%= r.udt %>, <%= r.udtMonth %> <%= r.udtYear %>
+                    </option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div id="laporanContainer">
+            <% ringkasan.forEach(pertemuan => { %>
+                <div class="pertemuan bg-black/20 backdrop-blur-lg rounded-lg p-4 " data-udt="<%= pertemuan.udt %>-<%= pertemuan.udtMonth %>-<%= pertemuan.udtYear %>">
+                    <h2 class="text-lg font-semibold text-blue-700">📅 Pertemuan <%= pertemuan.udt %>, <%= pertemuan.udtMonth %> <%= pertemuan.udtYear %></h2>
+                    <code class="text-black">
+                    <p class="mb-2 text-lg">LAPORAN DEWAN EVALUASI | PERTEMUAN <%= pertemuan.udt %>, <%= pertemuan.udtMonth %> <p%= pertemuan.udtYear %></p>
+                    <% pertemuan.laporan.forEach((laporan, index) => { %>
+                        <!-- <div class="bg-gray-100 p-4 my-2 rounded-md shadow">
+                            <p class="text-gray-700"><strong><%= index + 1 %>. <%= laporan.reportTitle %></strong></p>
+                            <p class="text-gray-600">📢 Pelapor: <%= laporan.reportAgent %></p>
+                            <p class="text-gray-600">⚖️ Terdakwa: <%= laporan.reportGuilties %></p>
+                            <p class="text-gray-600">📌 Alasan: <%= laporan.reportTypesAndCauses %></p>
+                            <p class="text-gray-600">⏰ Waktu Kejadian: <%= laporan.knownTimeHappened %></p>
+                            <p class="text-gray-600">📅 Diunggah: <%= laporan.uploadTime %></p>
+                            <p class="text-gray-600">🛠 Diedit: <%= laporan.isEdited ? "Ya" : "Tidak" %> <% if (laporan.isEdited) { %> (⏳ <%= laporan.timeEdited %>) <% } %></p>
+                        </div> -->
+                        <%
+                        let typeoflap = '';
+                        switch(Number(laporan.situation )){
+                            case 1: 
+                                typeoflap = "🟢 Laporan Normal"; 
+                                break;
+                            case 2: 
+                                typeoflap = "🟠 Laporan Perlu Perhatian"; 
+                                break;
+                            case 3: 
+                                typeoflap = "🔴 Laporan Darurat";
+                                break;
+                            case 4: 
+                                typeoflap = "⚠️  Perlu Atensi Tim Inti"; 
+                                break;
+                            case 5: 
+                                typeoflap = "🔵 Perlu Atensi Pratama/i";   
+                                break;
+                        } 
+                        %>
+                            <h5><strong><%= index + 1 %>. <%= laporan.reportTitle %></strong></h5>
+                            <p><strong>&nbsp;&nbsp;&nbsp;📢 Pelapor</strong>: <%= laporan.reportAgent %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;⚖️ Terdakwa</strong>: <%= laporan.reportGuilties %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;📌 Alasan</strong>: <%= laporan.reportTypesAndCauses %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;⏰ Waktu Kejadian</strong>: <%= laporan.knownTimeHappened %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;🏕️ Apakah di Hari/Waktu Pramuka</strong>: <%= (Boolean(laporan.isOnPramDay)) ? 'Ya' : 'Tidak' %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;🔍 Tipe Laporan</strong>: <%= typeoflap %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;📅 Diunggah</strong>: <%= formatDate(laporan.uploadTime) %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;🛠 Diedit</strong>: <%= laporan.isEdited ? "Ya. " : "Tidak" %> <% if (laporan.isEdited) { %> (⏳ <%= formatDate(laporan.timeEdited) %>) <% } %></p>
+                            ---------
+                    <% }); %>
+                </code>
+
+                </div>
+            <% }); %>
+            <button id="copyButton" class="w-32 h-10 bg-blue-500 hover:bg-blue-700 text-white mt-3 rounded-md border border-blue-800 font-semibold transition duration-200">
+                Copy
+            </button>
+            <p id="copySuccess" class="text-green-600 mt-2 hidden">✅ Teks berhasil disalin!</p>
+        </div>
+    </div>
+
+    <script>
+        let laporan = '';
+        document.getElementById('copyButton').addEventListener('click', function() {
+            let selectedUdt = document.getElementById('pertemuanSelector').value;
+            let laporanElement = document.querySelector(`.pertemuan[data-udt="${selectedUdt}"] code`);
+        
+            if (laporanElement) {
+                let laporanText = laporanElement.innerText.split("\n") // Split text by newlines
+                .map(line => line.trim()) // Trim spaces from each line
+                .filter(line => line.length > 0) // Remove empty lines
+                .join("\n"); // Join back with newlines; // Mengambil teks dalam <code>
+                navigator.clipboard.writeText(laporanText).then(() => {
+                    let successMessage = document.getElementById('copySuccess');
+                    successMessage.classList.remove('hidden'); // Menampilkan pesan sukses
+                    setTimeout(() => successMessage.classList.add('hidden'), 2000); // Sembunyikan pesan setelah 2 detik
+                }).catch(err => {
+                    console.error("Gagal menyalin teks", err);
+                });
+            }
+        });
+        
+        document.getElementById('pertemuanSelector').addEventListener('change', function() {
+            let selected = this.value;
+            laporan = '';
+
+            document.querySelectorAll('.pertemuan').forEach(p => {
+                p.style.display = p.dataset.udt === selected ? 'block' : 'none';
+            });
+
+        });
+
+        // Inisialisasi tampilan pertama
+        document.getElementById('pertemuanSelector').dispatchEvent(new Event('change'));
+    </script>
+<%- include('layout/footers/stickyFooter') %>

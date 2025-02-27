@@ -1,0 +1,69 @@
+<%- include('layout/header.ejs') %>
+<%- include('layout/headers/bodyOverflow.ejs') %>
+<%- include('layout/navs') %>
+<%- include('layout/dropdown') %>
+
+<div class="relative min-h-screen bg-gradient-to-br from-blue-400 via-teal-300 to-blue-500 text-white overflow-hidden flex flex-col justify-center items-center px-6">
+    <!-- Efek Blur & Transparansi -->
+    <div class="absolute inset-0 bg-white/20 backdrop-blur-xl"></div>
+
+    <!-- Konten -->
+    <div class="relative max-w-4xl p-8 text-gray-800 bg-white/20 backdrop-blur-lg rounded-xl shadow-lg text-center z-8 font-manrope mb-6">
+        <h1 class="text-4xl font-bold  mb-4 animate-fadeIn font-poppins text-cyan-800">About Us</h1>
+        <p class="text-lg text-gray-800 leading-relaxed animate-slideUp">
+            Selamat datang di <span class="font-semibold text-teal-700">Dewan Evaluasi</span>. Kami adalah sebuah sistem yang membantu mencatat, mengelola, dan menganalisis laporan evaluasi dengan lebih efisien dan terstruktur.
+        </p>
+        <h3 class="text-4xl font-bold  mb-4 animate-fadeIn font-poppins text-cyan-800">Copyright</h3>
+
+        <p>© 2025 Dewan Evaluasi. All rights reserved.</p>
+        <p>
+            The materials and images used on this website do not belong to kkyrajagula.  
+            This website is intended for personal use only.
+        </p>
+        <p class="mt-2 text-xs">
+            Image sources:  
+            <a href="https://pngtree.com/freepng/very-beautiful-landscape-part_7323244.html" class="text-blue-700 underline" target="_blank">
+                Landscape Image
+            </a> |  
+            <a href="https://www.cleanpng.com/png-boys-scout-boy-scout-standing-on-rock-stick-map-bo-7939890/" class="text-blue-700 underline" target="_blank">
+                Boy Scout Image
+            </a>
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <!-- Fitur 1 -->
+            <div class="p-6 bg-white/30 backdrop-blur-md rounded-lg shadow-md hover:scale-105 transition-transform">
+                <i class="fas fa-chart-line text-4xl text-teal-600 mb-2"></i>
+                <h2 class="text-xl font-semibold text-teal-800">Analisis Laporan</h2>
+                <p class="text-gray-700 text-sm">Kami menyajikan laporan dengan data yang terstruktur dan mudah dipahami.</p>
+            </div>
+
+            <!-- Fitur 2 -->
+            <div class="p-6 bg-white/30 backdrop-blur-md rounded-lg shadow-md hover:scale-105 transition-transform">
+                <i class="fas fa-lock text-4xl text-teal-600 mb-2"></i>
+                <h2 class="text-xl font-semibold text-teal-800">Keamanan Data</h2>
+                <p class="text-gray-700 text-sm">Data yang disimpan dienkripsi untuk memastikan keamanan dan kerahasiaan.</p>
+            </div>
+
+            <!-- Fitur 3 -->
+            <div class="p-6 bg-white/30 backdrop-blur-md rounded-lg shadow-md hover:scale-105 transition-transform">
+                <i class="fas fa-clock text-4xl text-teal-600 mb-2"></i>
+                <h2 class="text-xl font-semibold text-teal-800">Real-time Updates</h2>
+                <p class="text-gray-700 text-sm">Sistem kami diperbarui secara langsung untuk memastikan informasi selalu akurat.</p>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <a href="/" class="px-6 py-3 bg-teal-500 no-underline hover:bg-teal-600 text-white font-bold rounded-lg shadow-md transition-all">
+                Kembali ke Beranda
+            </a>
+        </div>
+    </div>
+
+    <!-- Efek Lingkaran Futuristik -->
+    <div class="absolute w-96 h-96 bg-teal-50/30 rounded-full blur-3xl top-10 left-10 animate-pulse"></div>
+    <div class="absolute w-72 h-72 bg-blue-500/30 rounded-full blur-3xl bottom-10 right-10 animate-pulse"></div>
+
+    <!-- Hak Cipta -->
+</div>
+
+<%- include('layout/footers/stickyFooter.ejs') %>

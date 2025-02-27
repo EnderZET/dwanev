@@ -1,0 +1,50 @@
+<%- include('layout/header') %>
+<%- include('layout/navs') %>
+<%- include('layout/dropdown') %>
+<body class="bg-gradient-to-b from-cyan-100 to-teal-50 m-0 md:h-full md:w-full pb-28 overflow-auto">
+    <img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full">
+
+    <div class="max-w-4xl mx-auto bg-white/70 backdrop-blur-lg p-6 shadow rounded">
+        <h2 class="text-2xl font-bold mb-4">Buat Laporan Baru</h2>
+        
+        <form action="/lapor" method="POST" class="space-y-4" id="kex">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        
+            <label class="block font-bold">Judul Laporan</label>
+            <input type="text" name="reportTitle" required class="border p-2 rounded w-full">
+            
+            <label class="block font-bold">Tipe Laporan</label>
+            <select name="situation" class="border p-2 rounded w-full">
+                <option value="1">Laporan Normal</option>
+                <option value="2">Laporan Perlu Perhatian</option>
+                <option value="3">Laporan Darurat</option>
+                <option value="4">Perlu Atensi Tim Inti</option>
+                <option value="5">Perlu Atensi Pratama/i</option>
+            </select>
+            
+            <label class="block font-bold">Waktu Kejadian</label>
+            <input type="date" name="knownTimeHappened" required class="border p-2 rounded w-full">
+            
+            <label class="block font-bold">Terdakwa (Pisahkan dengan koma jika lebih dari satu)<br>  * Misal: Mischa, Keinoke, Jared</label>
+            <input type="text" name="reportGuilties" class="border p-2 rounded w-full">
+            
+            <label class="block font-bold">Pelapor (Pisahkan dengan koma jika lebih dari satu)<br>  * Misal: Andre, Rainade, Denoin</label>
+            <input type="text" name="reportAgent" required class="border p-2 rounded w-full">
+            
+            <label class="block font-bold">Alasan & Penjelasan</label>
+            <textarea name="reportTypesAndCauses" required class="border p-2 rounded w-full h-28"></textarea>
+            
+            <div class="flex items-center">
+                <input type="checkbox" name="isPramuka" class="w-5 h-5 mr-2">
+                <label class="text-sm">Saat Pramuka?</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" name="isVerified" class="w-5 h-5 mr-2">
+                <label class="text-sm">Sudah Terverifikasi?</label>
+            </div>
+            
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full" onclick="document.querySelector('#gex').disabled = true; document.querySelector('#kex').submit()" id="gex">Kirim Laporan</button>
+        </form>
+    </div>
+</body>
+<%- include('layout/footers/fixedFooter') %>

@@ -1,0 +1,59 @@
+<%- include('layout/header') %>
+
+
+<body class="bg-gradient-to-br from-blue-100 via-teal-100 to-blue-200 bg-no-repeat md:overflow-hidden p-0 m-0 min-h-screen md:h-full md:w-full scroll-m-0">
+  <%- include('layout/navs') %>
+
+<!-- Background -->
+<img
+  class="-z-10 fixed left-0 bottom-0 scale-100 object-cover"
+  src="/images/landscape.png"
+  alt=""
+/>
+<img
+  class="z-7 fixed right-[100px] bottom-0 scale-125 md:top-5 md:scale-100 md:right-40 lg:right-52 lg:scale-100 xl:hidden 2xl:scale-50"
+  src="/images/person.png"
+  alt=""
+/>
+<!-- <img class="-z-8 absolute left-0 bottom-5 lg:scale-75 scale-125" src="/images/grass.png" alt="" /> -->
+<!-- <img class="-z-8 absolute left-0 -bottom-40 lg:scale-75 scale-125 rotate-180" src="/images/grass.png" alt="" /> -->
+
+<!-- <div class="-z-5 w-full h-24 bg-gradient-to-b from-jordyblue-300 to-jordyblue-100 absolute -bottom-24 px-5"></div> -->
+
+<!-- End of BG -->
+<!-- Main Content -->
+<!-- -  Main Text -->
+<h2
+  class="my-auto font-poppins font-extrabold text-[5rem] md:text-[7rem] absolute -z-10 right-4"
+>
+  Dewan
+</h2>
+<h3
+  class="my-auto font-poppins font-extrabold text-[3.5rem] md:text-[4.5rem] md:top-48 absolute right-4 top-40 -z-10"
+>
+  Evaluasi
+</h3>
+
+<!-- <div class="container absolute -bottom-full w-full h-full block">
+    <article>
+      <img class="-z-8 absolute -right-20 -bottom-1/4 top-1/4 lg:scale-100 scale-50 float-right" src="/images/scale.png"
+        alt="" />
+      <h1 class="font-manrope font-extrabold text-[3rem] absolute top-1/4">
+        Apasih Itu..
+      </h1>
+      <h1 class="font-poppins font-extrabold text-[3rem] absolute top-72 block">
+        Dewan
+      </h1>
+      <h2 class="font-poppins font-extrabold text-[3rem] absolute top-80 block">
+        Evaluasi
+      </h2>
+    </article>  
+  </div> -->
+  <%- include('layout/dropdown') %>
+  <script src="/javascripts/alerts.js"></script>
+  <script>
+  <% if (typeof alertMessage !== "undefined") { %>
+      showAlert("<%= alertMessage.message %>", "<%= alertMessage.type %>");
+  <% } %>
+  </script>   
+<%- include('layout/footers/fixedFooter') %>
