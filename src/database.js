@@ -1,4 +1,4 @@
-const mysql = require ('mysql')
+const mysql = require ('mysql2')
 const dotenv = require('dotenv').config();
 
 const urlDatabase = `mysql://${process.env.MYSQLUSER}:${process.env.MYSQLPASSOWRD}@${process.env.MYSQLHOST}:${process.env.MYSQLPORT}/${process.env.MYSQLDATABASE}`
