@@ -1,0 +1,27 @@
+<%- include('layout/header') %>
+
+<!-- <body class="bg-gradient-to-b from-cyan-100 to-teal-50 m-0 md:h-full md:w-full pb-28 overflow-auto">
+    <img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full">
+
+    <div class="max-w-4xl mx-auto bg-white/70 backdrop-blur-lg p-6 shadow rounded">
+        <h1 class="text-[4.5rem] text-red-600 font-poppins font-extrabold">Error</h1>
+    </div>
+</body> -->
+<body class='<%= (!easter_egg) ? "bg-gradient-to-b from-cyan-100 to-teal-50" : "bg-red-700" %> flex items-center
+ justify-center h-screen'>
+ <img src="/images/landscape.png" alt="" class='-z-10 fixed bottom-0 w-full <%= (easter_egg) ? "saturate-0" : "saturate-100" %>'>
+
+    <div class="text-center max-w-md p-6 bg-white/70 backdrop-blur-md shadow-xl rounded-lg font-manrope font-semibold">
+        <h1 class="text-[4rem] font-poppins font-bold text-red-500"><%= error === 404 ? "404" : "???" %></h1>
+        <h2 class="text-2xl font-semibold mt-2 text-gray-800">
+            <%= error === 404 ? "Oops! Halaman tidak ditemukan!" : (!easter_egg) ? "Ada yang error di Server!" : "Kayaknya ada yang aneh.." %>
+        </h2>
+        <p class="text-gray-600 mt-4">
+            <%= error === 404 ? "Kamu lagi mencari halaman yang sudah dihilangkan atau emang gak ada" : (!easter_egg) ? "Sepertinya server sedang error, silahkan kunjungi website nanti" : "Kayaknya ada yang janggal dan aneh... " %>
+        </p>
+        <a href="<%= (!easter_egg) ? '/' : 'https://pastebin.com/SN9MThcY'%>" class="mt-6 inline-block px-5 py-2 text-white no-underline <%= (!easter_egg) ? 'bg-blue-500' : 'bg-red-700' %> rounded-lg <%= (!easter_egg) ? 'hover:bg-blue-600' : 'hover:bg-red-800'%> transition">
+            Pergi ke <%= (!easter_egg) ? "Halaman Awal" : "H33lp!" %>
+        </a>
+    </div>
+</body>
+<%- include('layout/footers/fixedFooter') %>

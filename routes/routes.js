@@ -569,4 +569,9 @@ router.get("/dashboard", requireAuth, async (req, res) => {
     res.redirect("/");
   }
 });  
+
+router.use("/ada_sesuatu_yang_aneh", (req, res) => {
+  res.render("error", { error: 500, title: "??? | DEWANEV", easter_egg: true });
+});
+
 module.exports = router;
