@@ -37,7 +37,7 @@ function formatDate(dateString) {
                 <div class="pertemuan bg-black/20 backdrop-blur-lg rounded-lg p-4 " data-udt="<%= pertemuan.udt %>-<%= pertemuan.udtMonth %>-<%= pertemuan.udtYear %>">
                     <h2 class="text-lg font-semibold text-blue-700">📅 Pertemuan <%= pertemuan.udt %>, <%= pertemuan.udtMonth %> <%= pertemuan.udtYear %></h2>
                     <code class="text-black">
-                    <p class="mb-2 text-lg">LAPORAN DEWAN EVALUASI | PERTEMUAN <%= pertemuan.udt %>, <%= pertemuan.udtMonth %> <p%= pertemuan.udtYear %></p>
+                    <p class="mb-2 text-lg">LAPORAN DEWAN EVALUASI | PERTEMUAN <%= pertemuan.udt %>, <%= pertemuan.udtMonth %> <%= pertemuan.udtYear %></>
                     <% pertemuan.laporan.forEach((laporan, index) => { %>
                         <!-- <div class="bg-gray-100 p-4 my-2 rounded-md shadow">
                             <p class="text-gray-700"><strong><%= index + 1 %>. <%= laporan.reportTitle %></strong></p>
@@ -68,15 +68,15 @@ function formatDate(dateString) {
                                 break;
                         } 
                         %>
-                            <h5><strong><%= index + 1 %>. <%= laporan.reportTitle %></strong></h5>
-                            <p><strong>&nbsp;&nbsp;&nbsp;📢 Pelapor</strong>: <%= laporan.reportAgent %></p>
-                            <p><strong>&nbsp;&nbsp;&nbsp;⚖️ Terdakwa</strong>: <%= laporan.reportGuilties %></p>
-                            <p><strong>&nbsp;&nbsp;&nbsp;📌 Alasan</strong>: <%= laporan.reportTypesAndCauses %></p>
-                            <p><strong>&nbsp;&nbsp;&nbsp;⏰ Waktu Kejadian</strong>: <%= laporan.knownTimeHappened %></p>
-                            <p><strong>&nbsp;&nbsp;&nbsp;🏕️ Apakah di Hari/Waktu Pramuka</strong>: <%= (Boolean(laporan.isOnPramDay)) ? 'Ya' : 'Tidak' %></p>
+                            <h5><strong><%= index + 1 %>. <%= laporan.reporttitle %></strong></h5>
+                            <p><strong>&nbsp;&nbsp;&nbsp;📢 Pelapor</strong>: <%= laporan.reportagent %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;⚖️ Terdakwa</strong>: <%= laporan.reportguilties %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;📌 Alasan</strong>: <%= laporan.reporttypesandcauses %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;⏰ Waktu Kejadian</strong>: <%= laporan.knowntimehappened %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;🏕️ Apakah di Hari/Waktu Pramuka</strong>: <%= (Boolean(laporan.isonpramday)) ? 'Ya' : 'Tidak' %></p>
                             <p><strong>&nbsp;&nbsp;&nbsp;🔍 Tipe Laporan</strong>: <%= typeoflap %></p>
-                            <p><strong>&nbsp;&nbsp;&nbsp;📅 Diunggah</strong>: <%= formatDate(laporan.uploadTime) %></p>
-                            <p><strong>&nbsp;&nbsp;&nbsp;🛠 Diedit</strong>: <%= laporan.isEdited ? "Ya. " : "Tidak" %> <% if (laporan.isEdited) { %> (⏳ <%= formatDate(laporan.timeEdited) %>) <% } %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;📅 Diunggah</strong>: <%= formatDate(laporan.uploadtime) %></p>
+                            <p><strong>&nbsp;&nbsp;&nbsp;🛠 Diedit</strong>: <%= laporan.isedited ? "Ya. " : "Tidak" %> <% if (laporan.isedited) { %> (⏳ <%= formatDate(laporan.edittime) %>) <% } %></p>
                             ---------
                     <% }); %>
                 </code>

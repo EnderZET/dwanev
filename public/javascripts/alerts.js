@@ -90,16 +90,19 @@ function closeVerifyModal() {
 }
 
 // Submit form setelah input benar
-document.getElementById("confirmVerify").addEventListener("click", function() {
-    const inputText = document.getElementById("verifyInput").value.trim();
-
-    if (inputText === "AKU BERSUMPAH DEMI DP") {
-        document.getElementById("verifyForm").submit(); // Kirim form
-    } else {
-        alert("Kalimat salah! Ulangi dengan benar.");
-    }
-});
-
+var confirmVerifyBtn2 = document.getElementById("confirmVerify");
+if (confirmVerifyBtn2){
+    confirmVerifyBtn2.addEventListener("click", function() {
+        const inputText = document.getElementById("verifyInput").value.trim();
+    
+        if (inputText === "AKU BERSUMPAH DEMI DP") {
+            document.getElementById("verifyForm").submit(); // Kirim form
+        } else {
+            alert("Kalimat salah! Ulangi dengan benar.");
+        }
+    });
+    
+}
 
 function showPopup() {
     const popup = document.getElementById("popup");
