@@ -2,7 +2,7 @@
 <%- include('layout/navs') %> 
 <%- include('layout/dropdown') %>
 <%
-
+console.log(data)
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleString("id-ID", { 
@@ -26,7 +26,7 @@ function formatDate(dateString) {
     
         <!-- Search & Filter -->
         <div class="mb-4 grid grid-cols-1 sm:grid-cols-4 gap-3 font-manrope font-bold">
-            <select id="searchType" class="border p-2 rounded w-full">
+            <select id="searchType" class="border p-2 rounded w-full  cursor-pointer">
                 <option value="all">Universal</option>
                 <option value="uid">UID</option>
                 <option value="reportTitle">Nama Laporan</option>
@@ -36,17 +36,17 @@ function formatDate(dateString) {
             </select>
             <input type="text" id="searchInput" placeholder="Cari Data" class="border p-2 rounded w-full" />
             <label class="flex items-center gap-2">
-                <input type="checkbox" id="filterVerified" class="w-5 h-5" /> Terverifikasi
+                <input type="checkbox" id="filterVerified" class="w-5 h-5  cursor-pointer" /> Terverifikasi
             </label>
             <label class="flex items-center gap-2">
-                <input type="checkbox" id="filterEdited" class="w-5 h-5" /> Telah Diedit
+                <input type="checkbox" id="filterEdited" class="w-5 h-5  cursor-pointer" /> Telah Diedit
             </label>
         </div>
     
         <!-- Responsive Table -->
         <div class="mb-4 flex items-center gap-2 font-manrope font-bold">
             <label for="sortReports" class="text-sm">Urutkan:</label>
-            <select id="sortReports" class="border p-2 rounded">
+            <select id="sortReports" class="border p-2 rounded  cursor-pointer">
               <option value="latest">Terbaru</option>
               <option value="oldest">Terlama</option>
               <option value="mostGuilties">Paling Banyak Terdakwa</option>
@@ -97,22 +97,23 @@ function formatDate(dateString) {
                         } 
                     %>
                     <tr class="border">
+
                         <td class="border p-2"><%= dat.uid %></td>
-                        <td class="border p-2"><%= dat.udt %>, bulan <%= dat.udtMonth %> <%= dat.udtYear %></td>
-                        <td class="border p-2 w-32"><%= dat.reportTitle %></td>
+                        <td class="border p-2"><%= dat.udt %>, bulan <%= dat.udtmonth %> <%= dat.udtyear %></td>
+                        <td class="border p-2 w-32"><%= dat.reporttitle %></td>
                         <td class="border p-2 w-48"><%= typeoflap %></td>
-                        <td class="border p-2"><%= dat.knownTimeHappened %></td>
-                        <td class="border p-2 break-words"><%= dat.reportGuilties.replace(/,/g, '<br>') %></td>
-                        <td class="border p-2 break-words"><%= dat.reportAgent.replace(/,/g, '<br>') %></td>
-                        <td class="border p-2 w-40 break-words"><%= dat.reportTypesAndCauses %></td>
-                        <td class="border p-2 text-center"><%= dat.isOnPramDay ? "✅" : "❌" %></td>
-                        <td class="border p-2 text-center"><%= dat.isVerified ? "✅" : "❌" %></td>
-                        <td class="border p-2 text-center"><%= dat.isEdited ? "✅" : "❌" %></td>
-                        <td class="border p-2"><%= formatDate(dat.uploadTime) %></td>
-                        <td class="border p-2"><%= (dat.isEdited) ? formatDate(dat.editTime) : "Belum di-Edit" %></td>
+                        <td class="border p-2"><%= dat.knowntimehappened %></td>
+                        <td class="border p-2 break-words"><%= dat.reportguilties.replace(/,/g, '<br>') %></td>
+                        <td class="border p-2 break-words"><%= dat.reportagent.replace(/,/g, '<br>') %></td>
+                        <td class="border p-2 w-40 break-words"><%= dat.reporttypesandcauses %></td>
+                        <td class="border p-2 text-center"><%= dat.isonpramday ? "✅" : "❌" %></td>
+                        <td class="border p-2 text-center"><%= dat.isverified ? "✅" : "❌" %></td>
+                        <td class="border p-2 text-center"><%= dat.isedited ? "✅" : "❌" %></td>
+                        <td class="border p-2"><%= formatDate(dat.uploadtime) %></td>
+                        <td class="border p-2"><%= (dat.isedited) ? formatDate(dat.edittime) : "Belum di-Edit" %></td>
                         <td class="border p-2 flex flex-col gap-4">
                             <a href="/edit/<%= dat.uid %>" class="bg-yellow-700 text-white px-2 py-1 rounded text-xs h-8 w-full text-center leading-6 no-underline">Edit</a>
-                            <% if (!dat.isVerified) { %>
+                            <% if (!dat.isverified) { %>
                                 <form id="verifyForm" action="/verify" method="POST" onsubmit="return openVerifyModal(event)">
                                 <input type="hidden" name="_csrf" id="csrfToken" value="<%= csrfToken %>">
                                 <input type="hidden" name="uid" value="<%= dat.uid %>">

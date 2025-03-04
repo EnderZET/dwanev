@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const connection = require("../src/database");
-const crypto = require('crypto');
-const bcrypt = require('bcrypt');
+const crypto = require("crypto");
+const bcrypt = require("bcrypt");
+const request = require("sync-request");
 const SECRET_KEY = process.env.SECRET_KEY || "RED_AGATE_IS_RED"; // Harus disimpan di ENV
 const COOKIE_NAME = "red_agate";
 
@@ -24,13 +25,16 @@ const monthMap = {
 function generateAuthToken() {
   const timestamp = Date.now(); // Timestamp untuk mencegah replay attack
   const data = `red_agate_is_good.${timestamp}`; // Format token
-  const hmac = crypto.createHmac('sha256', SECRET_KEY).update(data).digest('hex'); // Buat signature HMAC
+  const hmac = crypto
+    .createHmac("sha256", SECRET_KEY)
+    .update(data)
+    .digest("hex"); // Buat signature HMAC
   return `${data}.${hmac}`; // Gabungkan data + signature
 }
 function verifyAuthToken(token) {
   if (!token) return false;
 
-  const parts = token.split('.');
+  const parts = token.split(".");
   if (parts.length !== 3) return false;
 
   const [prefix, timestamp, receivedHmac] = parts;
@@ -38,12 +42,15 @@ function verifyAuthToken(token) {
 
   // Cek apakah token sudah kedaluwarsa
   const tokenTime = parseInt(timestamp, 10);
-  if (isNaN(tokenTime) || Date.now() - tokenTime > (24 * 60 * 60 * 1000)) {
+  if (isNaN(tokenTime) || Date.now() - tokenTime > 24 * 60 * 60 * 1000) {
     return false;
   }
 
   // Validasi HMAC
-  const expectedHmac = crypto.createHmac('sha256', SECRET_KEY).update(data).digest('hex');
+  const expectedHmac = crypto
+    .createHmac("sha256", SECRET_KEY)
+    .update(data)
+    .digest("hex");
   return expectedHmac === receivedHmac;
 }
 
@@ -57,22 +64,21 @@ function requireAuth(req, res, next) {
       type: "error",
       message: "Sesi Anda telah kadaluarsa, silakan login kembali!",
     };
-    return res.redirect('/login');
+    return res.redirect("/login");
   }
 
   next();
 }
 
-
 function generateRandomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
 }
-
 
 function getMySQLDateTime(timeZone = "Asia/Jakarta") {
   const options = {
@@ -119,110 +125,144 @@ const getWBSCounter = (date) => {
   return counter;
 };
 
-
-
 // Main Router
 router.get("/export", requireAuth, async (req, res) => {
-  connection.query(`
-    SELECT udt, udtMonth, udtYear, situation, reportTitle, reportAgent, reportGuilties, reportTypesAndCauses, knownTimeHappened, uploadTime, isOnPramDay, isEdited, editTime
-    FROM LaporanTable
-    ORDER BY udtYear DESC, udtMonth DESC, udt DESC
-`, (err, results) => {
-    if (err) {
-        console.error(err);
-        return res.status(500).send("Gagal mengambil data");
-    }
+  connection.query(
+    `
+    SELECT udt, udtmonth, udtyear, situation, reporttitle, reportagent, 
+           reportguilties, reporttypesandcauses, knowntimehappened, uploadtime, 
+           isonpramday, isedited, edittime
+    FROM laporantable
+    ORDER BY udtyear DESC, udtmonth DESC, udt DESC
+    `,
+    (err, results) => {
+      if (err) {
+        req.session.alertMessage = { type: "error", message: "Gagal mengambil data! Errorcode: "+err.message}
+        res.redirect('/dashboard');
+      }
 
-    let ringkasan = {};
-    results.forEach(row => {
-        let key = `${row.udt}-${row.udtMonth}-${row.udtYear}`;
+      let ringkasan = {};
+      results.rows.forEach((row) => {
+        let key = `${row.udt}-${row.udtmonth}-${row.udtyear}`;
         if (!ringkasan[key]) {
-            ringkasan[key] = { udt: row.udt, udtMonth: row.udtMonth, udtYear: row.udtYear, laporan: [] };
+          ringkasan[key] = {
+            udt: row.udt,
+            udtMonth: row.udtmonth,
+            udtYear: row.udtyear,
+            laporan: [],
+          };
         }
         ringkasan[key].laporan.push(row);
-    });
+      });
 
-    res.render('export', { ringkasan: Object.values(ringkasan), title: "Export | DEWANEV" });
+      res.render("export", {
+        ringkasan: Object.values(ringkasan),
+        title: "Export | DEWANEV",
+      });
+    }
+  );
 });
 
-});
 
 router.get("/about", requireAuth, async (req, res) => {
-  res.render('about', { title: "About | DEWANEV" })
+  res.render("about", { title: "About | DEWANEV" });
 });
 
 router.get("/", requireAuth, async (req, res) => {
-  res.render('index', { title: "Home | DEWANEV" })
+  const alertMessage = req.session.alertMessage;
+  delete req.session.alertMessage;
+
+  res.render("index", { alertMessage, title: "Home | DEWANEV" });
 });
 
-router.get('/login',  (req, res) => {
+router.get("/login", (req, res) => {
   const token = req.cookies[COOKIE_NAME];
 
   // Jika tidak ada token, redirect ke login
   if (!token || !verifyAuthToken(token)) {
-    let a = 1
-  }else{
-    return res.redirect('/dashboard');
+    let a = 1;
+  } else {
+    return res.redirect("/dashboard");
   }
   const alertMessage = req.session.alertMessage;
   delete req.session.alertMessage;
-  res.render('login', {alertMessage, csrfToken: res.locals.csrfToken, title: "Login | DEWANEV"});
-})
-router.post('/login', (req, res) => {
-    const { username, password } = req.body;
-
-    // Contoh login sederhana (ganti dengan autentikasi dari database)
-    connection.query('SELECT * FROM controlData ORDER BY id LIMIT 1;', (err, results) => {
-      if (err) {
-        req.session.alertMessage = {
-          type: "error",
-          message: "Terjadi Error!\nCode Error: " + err.message,
-        };
-        res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV"});
-        return;
-      }
-      console.log(results)
-      if (results[0].username === username && bcrypt.compareSync(password, results[0].pwd)) {
-        req.session.user = { username }; // Simpan di session
-        const saltRounds = 10;
-        bcrypt.genSalt(saltRounds, function(err, salt) {
-          bcrypt.hash("accessGranted", salt, function(err, hash) {
-            if (err) {
-              req.session.alertMessage = {
-                  type: "error",
-                  message: "Terjadi kesalahan saat hashing.",
-              };
-              return res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
-            }
-            const token = generateAuthToken(); // Buat token autentikasi
-            res.cookie(COOKIE_NAME, token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 }); // Simpan cookie
-            return res.redirect('/dashboard');
-          } );
-        });
-        return;
-      }
-
-     req.session.alertMessage = {
-      type: "error",
-      message: "Username / Kata Sandi Salah!",
-     };
-     res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV"});
-    });
-
+  res.render("login", {
+    alertMessage,
+    csrfToken: res.locals.csrfToken,
+    title: "Login | DEWANEV",
+  });
 });
+
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  console.log('hello');
+
+  try {
+      // Fetch the first user from controlData
+      const result = await connection.query('SELECT * FROM controlData ORDER BY id LIMIT 1;');
+      console.log(result.rows);
+      if (result.rows.length === 0) {
+          req.session.alertMessage = {
+              type: "error",
+              message: "Terjadi Error! Data tidak ditemukan.",
+          };
+          return res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
+      }
+
+      const user = result.rows[0];
+      console.log(user);
+
+      if (user.username === username && bcrypt.compareSync(password, user.pwd)) {
+          req.session.user = { username }; // Simpan di session
+
+          const saltRounds = 10;
+          bcrypt.genSalt(saltRounds, function (err, salt) {
+              bcrypt.hash("accessGranted", salt, function (err, hash) {
+                  if (err) {
+                      req.session.alertMessage = {
+                          type: "error",
+                          message: "Terjadi kesalahan saat hashing.",
+                      };
+                      return res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
+                  }
+                  const token = generateAuthToken(); // Buat token autentikasi
+                  res.cookie(COOKIE_NAME, token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 }); // Simpan cookie
+                  return res.redirect('/dashboard');
+              });
+          });
+          return;
+      }
+
+      req.session.alertMessage = {
+          type: "error",
+          message: "Username / Kata Sandi Salah!",
+      };
+      res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
+
+  } catch (err) {
+      req.session.alertMessage = {
+          type: "error",
+          message: "Terjadi Error! CodeError: " + err.message,
+      };
+      res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
+  }
+});
+
 
 // Logout: Hapus session dan cookie
-router.get('/logout', (req, res) => {
-    res.clearCookie('user');
-    req.session.destroy(() => {
-        res.redirect('/login', {title: "Login | DEWANEV"});
-    });
+router.get("/logout", (req, res) => {
+  res.clearCookie("user");
+  req.session.destroy(() => {
+    res.redirect("/login", { title: "Login | DEWANEV" });
+  });
 });
-
 
 // Lapor routers
 router.get("/lapor", requireAuth, (req, res) => {
-  res.render("lapor", { title: "Lapor | DEWANEV", csrfToken: res.locals.csrfToken });
+  res.render("lapor", {
+    title: "Lapor | DEWANEV",
+    csrfToken: res.locals.csrfToken,
+  });
 });
 
 router.post("/lapor", requireAuth, (req, res) => {
@@ -236,19 +276,22 @@ router.post("/lapor", requireAuth, (req, res) => {
     situation,
     isVerified,
   } = req.body;
-  isVerified = isVerified === "on" ? 1 : 0;
-
-  let udt = getWBSCounter(knownTimeHappened);
-  let isOnPramDay = isPramuka === "on" ? 1 : 0;
-  let udtMonth = new Date(knownTimeHappened).getMonth()
-  let udtYear =  new Date(knownTimeHappened).getFullYear()
   
-  // console.log("Data yang dikirim:", req.body);
-  // console.log("Data yang akan dikirim:", JSON.stringify(udt));
-  let uploadTime = getMySQLDateTime();
+  isVerified = isVerified === "on";
+  let udt = getWBSCounter(knownTimeHappened);
+  let isOnPramDay = isPramuka === "on";
+  let udtMonth = new Date(knownTimeHappened).getMonth();
+  let udtYear = new Date(knownTimeHappened).getFullYear();
+  let uploadTime = getMySQLDateTime(); // Ensure this function returns a valid timestamp format for PostgreSQL
+
   connection.query(
-    "INSERT INTO LaporanTable (id, uid, udt, udtMonth, udtYear, situation, uploadTime, knownTimeHappened, reportTitle, reportGuilties, reportAgent, isVerified, isOnPramDay, reportTypesAndCauses, isEdited) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)",
-    [ null,
+    `INSERT INTO laporantable 
+    (uid, udt, udtmonth, udtyear, situation, uploadtime, knowntimehappened, 
+    reporttitle, reportguilties, reportagent, isverified, isonpramday, 
+    reporttypesandcauses, isedited) 
+    VALUES 
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+    [
       generateRandomString(16),
       udt,
       monthMap[udtMonth],
@@ -269,17 +312,22 @@ router.post("/lapor", requireAuth, (req, res) => {
         console.log(err);
         req.session.alertMessage = {
           type: "error",
-          message: "Gagal mengirim laporan!\nCode Error: " + err.message,
+          message: "Gagal mengirim laporan! CodeError: " + err.message,
         };
-        res.redirect("/dashboard");
+        return res.redirect("/dashboard");
       }
-      if (results.affectedRows > 0) {
+      if (results.rowCount > 0) {
         req.session.alertMessage = {
           type: "success",
           message: "Laporan berhasil dikirim!",
         };
-        res.redirect("/dashboard");
+      } else {
+        req.session.alertMessage = {
+          type: "error",
+          message: "Laporan gagal dikirim, tidak ada perubahan data!",
+        };
       }
+      res.redirect("/dashboard");
     }
   );
 });
@@ -288,13 +336,13 @@ router.post("/lapor", requireAuth, (req, res) => {
 router.get("/edit/:uid", requireAuth, (req, res) => {
   const uid = req.params.uid;
   connection.query(
-    "SELECT * FROM LaporanTable WHERE uid = ?",
+    "SELECT * FROM LaporanTable WHERE uid = $1",
     [uid],
     (err, results) => {
       if (err) throw err;
       res.render("edit", {
         title: "Edit Report | DEWANEV",
-        data: results[0],
+        data: results.rows[0],
         csrfToken: res.locals.csrfToken,
       });
     }
@@ -302,7 +350,7 @@ router.get("/edit/:uid", requireAuth, (req, res) => {
 });
 
 router.post("/edit/:uid", requireAuth, (req, res) => {
-  const uid = req.params.uid.replaceAll("$(sigma)[KKYRAJAGULA]$", "/");
+  const uid = req.params.uid;
   const {
     reportTitle,
     knownTimeHappened,
@@ -318,14 +366,18 @@ router.post("/edit/:uid", requireAuth, (req, res) => {
   let udt = getWBSCounter(knownTimeHappened);
   let udtMonth = monthMap[date.getMonth()];
   let udtYear = date.getFullYear();
-  let isOnPramDay = isPramuka === "on" ? 1 : 0;
-
+  let isOnPramDay = isScoutEvent === "on";
 
   // Lanjutkan dengan update database...
   // console.log("Data yang dikirim:", req.body);
-  console.log(getMySQLDateTime())
+  console.log(getMySQLDateTime());
   connection.query(
-    "UPDATE LaporanTable SET udt = ?, udtMonth = ?, udtYear = ?, situation = ?, knownTimeHappened = ?, reportTitle = ?, reportGuilties = ?, reportAgent = ?, isOnPramDay, reportTypesAndCauses = ?, isEdited = ?, editTime = ? WHERE uid = ?",
+    `UPDATE laporantable 
+    SET udt = $1, udtmonth = $2, udtyear = $3, situation = $4, 
+        knowntimehappened = $5, reporttitle = $6, reportguilties = $7, 
+        reportagent = $8, isonpramday = $9, reporttypesandcauses = $10, 
+        isedited = $11, edittime = $12 
+    WHERE uid = $13`,
     [
       udt,
       udtMonth,
@@ -337,7 +389,7 @@ router.post("/edit/:uid", requireAuth, (req, res) => {
       reportAgent,
       isOnPramDay,
       reportTypesAndCauses,
-      1,
+      true,
       getMySQLDateTime(),
       uid,
     ],
@@ -346,11 +398,11 @@ router.post("/edit/:uid", requireAuth, (req, res) => {
         console.log(err);
         req.session.alertMessage = {
           type: "error",
-          message: "Gagal mengedit laporan!\nCode Error: " + err.message,
+          message: "Gagal mengedit laporan! CodeError: " + err.message,
         };
         res.redirect("/dashboard");
       }
-      if (results.affectedRows > 0) {
+      if (results.rowCount > 0) {
         req.session.alertMessage = {
           type: "success",
           message: "Laporan berhasil diedit!",
@@ -360,33 +412,35 @@ router.post("/edit/:uid", requireAuth, (req, res) => {
     }
   );
 });
-
-// Verifikasi routers
 router.post("/verify", requireAuth, (req, res) => {
   const uid = req.body.uid;
 
   // Proses verifikasi di database...
   connection.query(
-    "UPDATE LaporanTable SET isVerified = 1 WHERE uid = ?",
+    "UPDATE laporantable SET isverified = TRUE WHERE uid = $1",
     [uid],
     (err, results) => {
       if (err) {
         req.session.alertMessage = {
           type: "error",
-          message: "Gagal memverifikasi laporan!\nCode Error: " + err.message,
+          message: "Gagal memverifikasi laporan! CodeError: " + err.message,
         };
-        res.redirect("/dashboard");
+        return res.redirect("/dashboard");
       }
-      if (results.affectedRows > 0) {
+      if (results.rowCount > 0) {
         req.session.alertMessage = {
           type: "success",
           message: "Laporan berhasil diverifikasi!",
         };
-        res.redirect("/dashboard");
+      } else {
+        req.session.alertMessage = {
+          type: "error",
+          message: "Laporan tidak ditemukan atau sudah diverifikasi!",
+        };
       }
+      res.redirect("/dashboard");
     }
   );
-
 });
 
 // Verifikasi routers
@@ -395,122 +449,124 @@ router.post("/unverify", requireAuth, (req, res) => {
 
   // Proses verifikasi di database...
   connection.query(
-    "UPDATE LaporanTable SET isVerified = 0 WHERE uid = ?",
+    'UPDATE LaporanTable SET "isverified" = false WHERE "uid" = $1',
     [uid],
     (err, results) => {
       if (err) {
         req.session.alertMessage = {
           type: "error",
-          message: "Gagal membatalkan verifikasi laporan!\nCode Error: " + err.message,
+          message:
+            "Gagal membatalkan verifikasi laporan! CodeError: " + err.message,
         };
-        res.redirect("/dashboard");
+        return res.redirect("/dashboard");
       }
-      if (results.affectedRows > 0) {
+      if (results.rowCount > 0) {
         req.session.alertMessage = {
           type: "success",
           message: "Laporan berhasil dibatalkan verifikasi-Nya!",
         };
-        res.redirect("/dashboard");
+      } else {
+        req.session.alertMessage = {
+          type: "error",
+          message: "Laporan tidak ditemukan atau sudah tidak terverifikasi.",
+        };
       }
+      res.redirect("/dashboard");
     }
   );
-
 });
+
 
 // Delete routers
 router.post("/delete", requireAuth, (req, res) => {
   const { uid } = req.body;
-  connection.query("DELETE FROM LaporanTable WHERE uid = ?", [uid], (err, results) => {
-    if (err) {
-      req.session.alertMessage = {
-        type: "error",
-        message: "Gagal menghapus laporan!\nCode Error: " + err.message,
-      };
+  connection.query(
+    "DELETE FROM LaporanTable WHERE uid = $1",
+    [uid],
+    (err, results) => {
+      if (err) {
+        req.session.alertMessage = {
+          type: "error",
+          message: "Gagal menghapus laporan! CodeError: " + err.message,
+        };
+        return res.redirect("/dashboard");
+      }
+      if (results.rowCount > 0) {
+        req.session.alertMessage = {
+          type: "success",
+          message: "Laporan berhasil dihapus!",
+        };
+      } else {
+        req.session.alertMessage = {
+          type: "error",
+          message: "Laporan tidak ditemukan atau sudah dihapus.",
+        };
+      }
       res.redirect("/dashboard");
     }
-    if (results.affectedRows > 0) {
-      req.session.alertMessage = {
-        type: "success",
-        message: "Laporan berhasil dihapus!",
-      };
-      res.redirect("/dashboard");
-    }
-  }
   );
 });
 
-// Dashboard routers
-router.get("/dashboard", requireAuth, (req, res) => {
-  const sortOption = req.query.sort || "latest"; // Default: terbaru
-  let orderByClause = "ORDER BY uploadTime DESC"; // Default: terbaru
 
+// Dashboard routers
+router.get("/dashboard", requireAuth, async (req, res) => {
+  const sortOption = req.query.sort || "latest"; // Default: terbaru
+  let orderByClause = "ORDER BY uploadtime DESC"; // Default: terbaru
+  
   switch (sortOption) {
     case "oldest":
-      orderByClause = "ORDER BY uploadTime ASC";
+      orderByClause = "ORDER BY uploadtime ASC";
       break;
     case "mostGuilties":
       orderByClause =
-        "ORDER BY CHAR_LENGTH(reportGuilties) - CHAR_LENGTH(REPLACE(reportGuilties, ',', '')) DESC";
+        "ORDER BY LENGTH(reportguilties) - LENGTH(REPLACE(reportguilties, ',', '')) DESC";
       break;
     case "mostAgents":
       orderByClause =
-        "ORDER BY CHAR_LENGTH(reportAgent) - CHAR_LENGTH(REPLACE(reportAgent, ',', '')) DESC";
+        "ORDER BY LENGTH(reportagent) - LENGTH(REPLACE(reportagent, ',', '')) DESC";
       break;
     case "nearestTime":
       orderByClause =
-        "ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), knownTimeHappened)) ASC";
+        "ORDER BY ABS(EXTRACT(EPOCH FROM knowntimehappened::timestamp - NOW())) ASC";
       break;
     case "verified":
-      orderByClause = "ORDER BY isVerified DESC";
+      orderByClause = "ORDER BY isverified DESC";
       break;
   }
-
+  
   const alertMessage = req.session.alertMessage;
   delete req.session.alertMessage;
   let page = parseInt(req.query.page) || 1;
   let limit = 8;
   let offset = (page - 1) * limit;
   let search = req.query.search || ""; // Ambil nilai pencarian
-
+  
   let countQuery =
-    "SELECT COUNT(*) AS total FROM LaporanTable WHERE reportTitle LIKE ?";
-  let dataQuery = `SELECT * FROM LaporanTable WHERE reportTitle LIKE ?  ${orderByClause} LIMIT ?, ?`;
-
-  connection.query(countQuery, [`%${search}%`], (err, countResult) => {
-    if (err) {
-      req.session.alertMessage = {
-        type: "error",
-        message: "Gagal Menampilkan Data!\nCode Error: " + err.message,
-      };
-      res.redirect("/");
-    }
-    let totalRecords = countResult[0].total;
+    `SELECT COUNT(*) AS total FROM laporantable WHERE reporttitle ILIKE $1`;
+  let dataQuery = `SELECT * FROM laporantable WHERE reporttitle ILIKE $1 ${orderByClause} LIMIT $2 OFFSET $3`;
+  
+  try {
+    const countResult = await connection.query(countQuery, [`%${search}%`]);
+    let totalRecords = countResult.rows[0].total;
     let totalPages = Math.ceil(totalRecords / limit);
-
-    connection.query(
-      dataQuery,
-      [`%${search}%`, offset, limit],
-      (err, results) => {
-        if (err){
-          req.session.alertMessage = {
-            type: "error",
-            message: "Gagal Menampilkan Data!\nCode Error: " + err.message,
-          };
-          res.redirect("/");
-        }
-        res.render("dashboard", {
-          data: results,
-          totalPages,
-          currentPage: page,
-          searchQuery: search, // Kirimkan searchQuery agar bisa dipakai di frontend
-          title: "Dashboard | DEWANEV",
-          csrfToken: res.locals.csrfToken,
-          alertMessage,
-        });
-      }
-    );
-  });
-});
-
-
+  
+    const results = await connection.query(dataQuery, [`%${search}%`, limit, offset]);
+  
+    res.render("dashboard", {
+      data: results.rows,
+      totalPages,
+      currentPage: page,
+      searchQuery: search, // Kirimkan searchQuery agar bisa dipakai di frontend
+      title: "Dashboard | DEWANEV",
+      csrfToken: res.locals.csrfToken,
+      alertMessage,
+    });
+  } catch (err) {
+    req.session.alertMessage = {
+      type: "error",
+      message: "Gagal Menampilkan Data! CodeError: " + err.message,
+    };
+    res.redirect("/");
+  }
+});  
 module.exports = router;

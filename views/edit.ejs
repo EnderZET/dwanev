@@ -1,8 +1,8 @@
 <%- include("layout/header") %>
 <body class="bg-gradient-to-b from-cyan-100 to-teal-50 p-0 m-0 md:h-full md:w-full">
     <img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full">
-<div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-  <div class="bg-white shadow-lg rounded-lg p-6 w-full max-w-2xl">
+<div class="min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white/70 backdrop-blur-md shadow-lg rounded-lg p-6 w-full max-w-2xl">
     <h2 class="text-2xl font-bold mb-4 text-gray-700">Edit Data</h2>
 
     <form action="/edit/<%= data.uid %>" method="POST" class="space-y-4">
@@ -25,7 +25,7 @@
         <input
           type="text"
           name="reportTitle"
-          value="<%= data.reportTitle %>"
+          value="<%= data.reporttitle %>"
           class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
       </div>
@@ -36,7 +36,7 @@
         <input
           type="date"
           name="knownTimeHappened"
-          value="<%= data.knownTimeHappened %>"
+          value="<%= data.knowntimehappened %>"
           class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
       </div>
@@ -47,7 +47,7 @@
         <input
           type="text"
           name="reportGuilties"
-          value="<%= data.reportGuilties %>"
+          value="<%= data.reportguilties %>"
           class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
       </div>
@@ -58,7 +58,7 @@
         <input
           type="text"
           name="reportAgent"
-          value="<%= data.reportAgent %>"
+          value="<%= data.reportagent %>"
           class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
       </div>
@@ -69,13 +69,13 @@
         <textarea
           name="reportTypesAndCauses"
           class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        ><%= data.reportTypesAndCauses %></textarea>
+        ><%= data.reporttypesandcauses %></textarea>
       </div>
 
       <!-- Dropdown Situasi -->
       <div>
         <label class="block text-gray-600">Situasi</label>
-        <select name="situation" class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        <select name="situation" class="w-full px-3 py-2 border  cursor-pointer rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
             <option value="1" <%= Number(data.uid.split('/')[2]) === 1 ? 'selected' : '' %>>🟢 Laporan Normal</option>
             <option value="2" <%= Number(data.uid.split('/')[2]) === 2 ? 'selected' : '' %>>🟠 Laporan Perlu Perhatian</option>
             <option value="3" <%= Number(data.uid.split('/')[2]) === 3 ? 'selected' : '' %>>🔴 Laporan Darurat</option>
@@ -89,8 +89,8 @@
       <!-- Checkbox Saat Pramuka -->
       <div class="flex items-center">
         <input type="checkbox" name="isScoutEvent" id="isScoutEvent"
-        class="mr-2" <%= data.isScoutEvent ? 'checked' : '' %>>
-        <label for="isScoutEvent" class="text-sm font-medium">Saat Pramuka?</label>
+        class="mr-2" <%= data.isonpramday ? 'checked' : '' %>>
+        <label for="isScoutEvent" class="text-sm font-medium  cursor-pointer">Saat Pramuka?</label>
       </div>
 
       <!-- Tombol Submit -->

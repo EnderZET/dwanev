@@ -11,35 +11,35 @@
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         
             <label class="block font-bold">Judul Laporan</label>
-            <input type="text" name="reportTitle" required class="border p-2 rounded w-full">
+            <input type="text" autocomplete="off" name="reportTitle" required class="border p-2 rounded w-full">
             
             <label class="block font-bold">Tipe Laporan</label>
-            <select name="situation" class="border p-2 rounded w-full">
-                <option value="1">Laporan Normal</option>
-                <option value="2">Laporan Perlu Perhatian</option>
-                <option value="3">Laporan Darurat</option>
-                <option value="4">Perlu Atensi Tim Inti</option>
-                <option value="5">Perlu Atensi Pratama/i</option>
+            <select name="situation" class="border p-2 rounded w-full  cursor-pointer">
+                <option value="1">🟢 Laporan Normal</option>
+                <option value="2">🟠 Laporan Perlu Perhatian</option>
+                <option value="3">🔴 Laporan Darurat</option>
+                <option value="4">⚠️  Perlu Atensi Tim Inti</option>
+                <option value="5">🔵 Perlu Atensi Pratama/i</option>
             </select>
             
             <label class="block font-bold">Waktu Kejadian</label>
             <input type="date" name="knownTimeHappened" required class="border p-2 rounded w-full">
             
             <label class="block font-bold">Terdakwa (Pisahkan dengan koma jika lebih dari satu)<br>  * Misal: Mischa, Keinoke, Jared</label>
-            <input type="text" name="reportGuilties" class="border p-2 rounded w-full">
+            <input type="text" autocomplete="off" name="reportGuilties" class="border p-2 rounded w-full">
             
             <label class="block font-bold">Pelapor (Pisahkan dengan koma jika lebih dari satu)<br>  * Misal: Andre, Rainade, Denoin</label>
-            <input type="text" name="reportAgent" required class="border p-2 rounded w-full">
+            <input type="text" autocomplete="off" name="reportAgent" required class="border p-2 rounded w-full">
             
             <label class="block font-bold">Alasan & Penjelasan</label>
             <textarea name="reportTypesAndCauses" required class="border p-2 rounded w-full h-28"></textarea>
             
             <div class="flex items-center">
-                <input type="checkbox" name="isPramuka" class="w-5 h-5 mr-2">
+                <input type="checkbox" name="isPramuka" class="w-5 h-5 mr-2 cursor-pointer">
                 <label class="text-sm">Saat Pramuka?</label>
             </div>
             <div class="flex items-center">
-                <input type="checkbox" name="isVerified" class="w-5 h-5 mr-2">
+                <input type="checkbox" name="isVerified" class="w-5 h-5 mr-2 cursor-pointer">
                 <label class="text-sm">Sudah Terverifikasi?</label>
             </div>
             
