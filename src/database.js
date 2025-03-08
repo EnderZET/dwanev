@@ -9,6 +9,14 @@ const pool = new Pool({
   database: process.env.PGDATABASESSS || "dewanev",
 });
 
+const poolSkor = new Pool({
+  user: process.env.PG2USER,
+  password: process.env.PG2PASSWORD,
+  host: process.env.PG2HOST,
+  port: process.env.PG2PORT,
+  database: process.env.PGDATABASESSS || "dewanevScores",
+});
+
 pool.connect((err, client, release) => {
   if (err) {
     console.error("Error connecting to PostgreSQL:", err);
@@ -18,4 +26,15 @@ pool.connect((err, client, release) => {
   }
 });
 
-module.exports = pool;
+
+poolSkor.connect((err, client, release) => {
+  if (err) {
+    console.error("Error connecting to PostgreSQL Second Database Section:", err);
+  } else {
+    console.log("Connected to PostgreSQL Second Database Section");
+    release();
+  }
+});
+
+
+module.exports = {pool, poolSkor};

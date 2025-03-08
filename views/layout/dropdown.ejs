@@ -1,23 +1,29 @@
 
 <div
-class="w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 2xl:w-7/12 mx-auto z-10 rounded-md mt-4 h-60 bg-black/10 backdrop-blur-md hidden"
+class="w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 2xl:w-7/12 mx-auto z-10 rounded-md mt-4 <%= (perm==='admin') ? 'h-60' : 'h-40' %> bg-black/10 backdrop-blur-md hidden"
 id="dropdownT"
 >
 <ul class="justify-center block font-poppins font-bold text-gray-800">
-  <li class="mx-auto w-full pr-5">
+  <% if (perm==="admin"){ %><li class="mx-auto w-full pr-5">
     <button class="h-20 w-full bg-transparent hover:text-jordyblue-800" onclick="window.location.replace('/dashboard')" id="bdr1">
       <span class="text-4xl" id="dr1">Dashboard</span>
     </button>
-  </li>
+  </li><% } %>
   <li class="mx-auto w-full pr-5">
-    <button class="h-20 w-full bg-transparent hover:text-jordyblue-800" id="bdr2" onclick="window.location.replace('/about')">
-      <span class="text-4xl" id="drd2">About</span>
+    <button class="h-20 w-full bg-transparent hover:text-jordyblue-800" id="bdr2" onclick="window.location.replace('/skor')">
+      <span class="text-4xl" id="drd2">Skor</span>
     </button>
   </li>
   <li class="mx-auto w-full pr-5">
+    <button class="h-20 w-full bg-transparent hover:text-jordyblue-800" id="bdr4" onclick="window.location.replace('/about')">
+      <span class="text-4xl" id="drd4">About</span>
+    </button>
+  </li>
+  <% if (perm==="admin"){ %><li class="mx-auto w-full pr-5">
     <button class="h-20 w-full bg-transparent hover:text-jordyblue-800" id="bdr3" onclick="window.location.replace('/lapor')">
       <span class="text-4xl"  id="drd3">Lapor</span>
     </button>
-  </li>
+  </li><% } %>
+
 </ul>
 </div>

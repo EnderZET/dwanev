@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const connection = require("../src/database");
+const {pool: connection, poolSkor: connectionSkor} = require("../src/database");
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const request = require("sync-request");
-const SECRET_KEY = process.env.SECRET_KEY || "RED_AGATE_IS_RED"; // Harus disimpan di ENV
-const COOKIE_NAME = "red_agate";
+const SECRET_KEY = process.env.SECRET_KEY;
+const COOKIE_NAME = process.env.COOKIE_NAME;
 
 const monthMap = {
   0: "Januari",
@@ -22,23 +22,24 @@ const monthMap = {
   11: "Desember",
 };
 
-function generateAuthToken() {
+function generateAuthToken(perm = "score_viewer") {
   const timestamp = Date.now(); // Timestamp untuk mencegah replay attack
-  const data = `red_agate_is_good.${timestamp}`; // Format token
+  const data = `${perm}.${timestamp}`; // Format token
   const hmac = crypto
     .createHmac("sha256", SECRET_KEY)
     .update(data)
     .digest("hex"); // Buat signature HMAC
   return `${data}.${hmac}`; // Gabungkan data + signature
 }
-function verifyAuthToken(token) {
+function verifyAuthToken(req, token) {
   if (!token) return false;
 
   const parts = token.split(".");
   if (parts.length !== 3) return false;
 
-  const [prefix, timestamp, receivedHmac] = parts;
-  const data = `${prefix}.${timestamp}`;
+  const [perm, timestamp, receivedHmac] = parts;
+  const data = `${perm}.${timestamp}`;
+  req.session.RedAgateIsBeautiful=perm;
 
   // Cek apakah token sudah kedaluwarsa
   const tokenTime = parseInt(timestamp, 10);
@@ -58,11 +59,11 @@ function requireAuth(req, res, next) {
   const token = req.cookies[COOKIE_NAME];
 
   // Jika tidak ada token, redirect ke login
-  if (!token || !verifyAuthToken(token)) {
+  if (!token || !verifyAuthToken(req, token)) {
     res.clearCookie(COOKIE_NAME); // Hapus cookie jika tidak valid
     req.session.alertMessage = {
       type: "error",
-      message: "Sesi Anda telah kadaluarsa, silakan login kembali!",
+      message: "Sesi Anda telah kadaluarsa/Anda tidak memiliki akses, silakan login kembali!",
     };
     return res.redirect("/login");
   }
@@ -165,14 +166,14 @@ router.get("/export", requireAuth, async (req, res) => {
 
 
 router.get("/about", requireAuth, async (req, res) => {
-  res.render("about", { title: "About | DEWANEV" });
+  res.render("about", { title: "About | DEWANEV", perm: req.session.RedAgateIsBeautiful });
 });
 
 router.get("/", requireAuth, async (req, res) => {
   const alertMessage = req.session.alertMessage;
   delete req.session.alertMessage;
 
-  res.render("index", { alertMessage, title: "Home | DEWANEV" });
+  res.render("index", { alertMessage, title: "Home | DEWANEV", perm: req.session.RedAgateIsBeautiful });
 });
 
 router.get("/login", (req, res) => {
@@ -195,12 +196,10 @@ router.get("/login", (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  console.log('hello');
 
   try {
       // Fetch the first user from controlData
-      const result = await connection.query('SELECT * FROM controlData ORDER BY id LIMIT 1;');
-      console.log(result.rows);
+      const result = await connection.query('SELECT * FROM controlData WHERE username = $1', [username]);
       if (result.rows.length === 0) {
           req.session.alertMessage = {
               type: "error",
@@ -210,7 +209,7 @@ router.post('/login', async (req, res) => {
       }
 
       const user = result.rows[0];
-      console.log(user);
+
 
       if (user.username === username && bcrypt.compareSync(password, user.pwd)) {
           req.session.user = { username }; // Simpan di session
@@ -223,37 +222,47 @@ router.post('/login', async (req, res) => {
                           type: "error",
                           message: "Terjadi kesalahan saat hashing.",
                       };
-                      return res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
+                      let alertMessage = req.session.alertMessage;
+                      delete req.session.alertMessage;
+                      return res.render('login', { alertMessage, title: "Login | DEWANEV" });
                   }
                   const token = generateAuthToken(); // Buat token autentikasi
                   res.cookie(COOKIE_NAME, token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 }); // Simpan cookie
+                  delete req.session.alertMessage;
                   return res.redirect('/dashboard');
               });
           });
           return;
       }
 
-      req.session.alertMessage = {
+      let alertMessage = {
           type: "error",
           message: "Username / Kata Sandi Salah!",
       };
-      res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
+      res.render('login', { alertMessage, title: "Login | DEWANEV" });
 
   } catch (err) {
-      req.session.alertMessage = {
+      let alertMessage = {
           type: "error",
           message: "Terjadi Error! CodeError: " + err.message,
       };
-      res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
+      res.render('login', { alertMessage, title: "Login | DEWANEV" });
   }
 });
 
 
 // Logout: Hapus session dan cookie
 router.get("/logout", (req, res) => {
-  res.clearCookie("user");
-  req.session.destroy(() => {
-    res.redirect("/login", { title: "Login | DEWANEV" });
+  res.clearCookie(COOKIE_NAME);
+  req.session.destroy((err) => {
+    if (err){
+      req.session.alertMessage({
+        type: "error",
+        message: "Tidak bisa log-out: "+err.message,
+      })
+      return res.redirect('/')
+    }
+    res.redirect("/login");
   });
 });
 
@@ -568,7 +577,80 @@ router.get("/dashboard", requireAuth, async (req, res) => {
     };
     res.redirect("/");
   }
-});  
+});
+
+
+// Skor Web
+
+// Route untuk menampilkan halaman skor
+router.get('/skor', async (req, res) => {
+  const { sortBy } = req.query; // Mendapatkan parameter query dari dropdown
+
+  let orderClause = 'ORDER BY nama'; // Default sorting (alfabet)
+  if (sortBy === 'score_asc') {
+    orderClause = 'ORDER BY skor ASC'; // Skor terendah
+  } else if (sortBy === 'score_desc') {
+    orderClause = 'ORDER BY score DESC'; // Skor tertinggi
+  } else if (sortBy === 'name_desc') {
+    orderClause = 'ORDER BY nama DESC'; // Alfabet terbalik
+  }
+
+  try {
+    // Ambil data siswa berdasarkan status
+    const gdResult = await connectionSkor.query(`SELECT * FROM skor WHERE status = $1 ${orderClause}`, ['GD']);
+    const gdpResult = await connectionSkor.query(`SELECT * FROM skor WHERE status = $1 ${orderClause}`, ['GDP']);
+    const dppResult = await connectionSkor.query(`SELECT * FROM skor WHERE status = $1 ${orderClause}`, ['DPP']);
+
+    // Pisahkan data berdasarkan status
+    const gdStudents = gdResult.rows;
+    const gdpStudents = gdpResult.rows;
+    const dppStudents = dppResult.rows;
+
+    // Render halaman skor dengan data siswa
+    res.render('skor-admin', { csrfToken: res.locals.csrfToken, gdStudents, gdpStudents, dppStudents, sortBy, title: "Skor | DEWANEV", perm: req.session.RedAgateIsBeautiful });
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    res.status(500).send('Error fetching data');
+  }
+});
+
+// Route untuk memperbarui skor
+router.post('/update-score', async (req, res) => {
+  const { studentId, action } = req.body;
+
+  try {
+    // Ambil skor siswa yang akan diperbarui
+    const result = await client.query('SELECT * FROM skor WHERE id = $1', [studentId]);
+    const student = result.rows[0];
+
+    if (student) {
+      let newScore = student.score;
+
+      // Perbarui skor sesuai aksi
+      if (action === 'increase') {
+        newScore += 10;  // Menambah skor 10
+      } else if (action === 'decrease') {
+        newScore -= 10;  // Mengurangi skor 10
+      }
+
+      // Update skor di database
+      await client.query('UPDATE skor SET score = $1 WHERE id = $2', [newScore, studentId]);
+    }
+
+    // Kembali ke halaman skor dengan data yang diperbarui
+    res.redirect('/skor');
+  } catch (err) {
+    console.error('Error updating score:', err);
+    res.status(500).send('Error updating score');
+  }
+});
+
+module.exports = router;
+
+
+
+
+
 
 router.use("/ada_sesuatu_yang_aneh", (req, res) => {
   res.render("error", { error: 500, title: "??? | DEWANEV", easter_egg: true });
