@@ -695,7 +695,7 @@ router.get('/skor', requireAuth, async (req, res) => {
 
 router.post('/update-score-add/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
-  const { dropdown } = req.body;
+  const { dropdown2: dropdown } = req.body;
 
   axios.get(`https://api.github.com/gists/${process.env.GIST_ID}`, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}})
   .then(async response => {
