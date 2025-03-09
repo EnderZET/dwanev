@@ -180,6 +180,7 @@ router.get("/export", requireAuth, async (req, res) => {
       res.render("export", {
         ringkasan: Object.values(ringkasan),
         title: "Export | DEWANEV",
+        perm: req.session.RedAgateIsBeautiful
       });
     }
   );
@@ -299,6 +300,7 @@ router.get("/lapor", requireAuth, (req, res) => {
   res.render("lapor", {
     title: "Lapor | DEWANEV",
     csrfToken: res.locals.csrfToken,
+    perm: req.session.RedAgateIsBeautiful
   });
 });
 
@@ -395,6 +397,7 @@ router.get("/edit/:uid", requireAuth, (req, res) => {
         title: "Edit Report | DEWANEV",
         data: results.rows[0],
         csrfToken: res.locals.csrfToken,
+        perm: req.session.RedAgateIsBeautiful
       });
     }
   );
