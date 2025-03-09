@@ -1,0 +1,121 @@
+<%- include('layout/header') %>
+<body class="bg-gradient-to-br from-blue-100 via-teal-100 to-blue-200 w-full h-full overflow-x-hidden bg-repeat bg-cover">
+  <%- include('layout/navs') %>
+  <%- include('layout/dropdown') %>
+  <!-- Background -->
+    <img class="-z-10 fixed left-0 bottom-0 scale-100 object-cover" src="/images/landscape.png" alt=""/>
+  <!-- Container Utama -->
+  <div class="flex items-center justify-center min-h-screen sm:w-full mx-auto px-4">
+    <div class="w-full max-w-4xl bg-white/70 backdrop-blur-md rounded-lg shadow-lg p-6">
+
+      <!-- Judul -->
+      <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 pt-6">Daftar Skor Siswa</h1>
+
+      <!-- Form Pencarian -->
+      <div class="mb-4 flex justify-center items-center space-x-2">
+        <input type="text" id="searchInput" placeholder="Cari berdasarkan nama..." class="px-4 py-2 border rounded-lg text-sm sm:text-base w-64">
+        <button onclick="searchAndScroll()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Cari</button>
+      </div>
+      <p class="text-red-700 text-center hidden transition-all" id="error-search-nfound">Nama tidak ditemukan!</p>
+
+      <!-- Form Dropdown untuk Sortir -->
+      <form action="/skor" method="GET" class="mb-4 flex justify-center">
+        <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
+        <label for="sortBy" class="mr-2 mt-2 text-gray-700">Sortir:</label>
+        <select name="sortBy" id="sortBy" class="px-4 py-2 border rounded-lg text-sm sm:text-base" onchange="this.form.submit()">
+          <option value="name" <% if (sortBy !== 'score_asc' && sortBy !== 'score_desc' && sortBy !== 'name_desc') { %>selected<% } %>>Alfabet (Default)</option>
+          <option value="score_asc" <% if (sortBy === 'score_asc') { %>selected<% } %>>Skor Terendah</option>
+          <option value="score_desc" <% if (sortBy === 'score_desc') { %>selected<% } %>>Skor Tertinggi</option>
+          <option value="name_desc" <% if (sortBy === 'name_desc') { %>selected<% } %>>Alfabet (Terbalik)</option>
+        </select>
+      </form>
+
+      <!-- Tabel GD (Garuda) -->
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Pramuka Garuda</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto border-collapse border border-gray-300 rounded-lg mb-6 w-full mx-auto">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 text-left text-gray-600 font-semibold">Nama</th>
+              <th class="px-4 py-2 text-left text-gray-600 font-semibold">Skor</th>
+              <th class="px-4 py-2 text-right text-gray-600 font-semibold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="studentTable">
+            <% gdStudents.forEach(student => { %>
+              <tr class="border-b border-gray-200 hover:bg-gray-100"  data-name="<%= student.nama.toLowerCase() %>">
+                <td class="px-4 py-2 text-gray-700 font-semibold font-poppins"><%= student.nama %></td>
+                <td class="px-4 py-2 text-gray-700 font-semibold font-manrope"><%= student.skor %></td>
+                <td class="px-4 py-2 flex space-x-2 justify-center">
+                    <form action="/profile/<%= student.uid %>" method="GET" class="flex items-center">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Lihat Profil</button>
+                    </form>
+                  </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tabel GDP (Garuda DPP) -->
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4 mt-3">Pramuka Garuda dan Dewan Penggalang Pramuka</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto border-collapse border border-gray-300 rounded-lg mb-6 w-full mx-auto">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 text-left text-gray-600 font-semibold">Nama</th>
+              <th class="px-4 py-2 text-left text-gray-600 font-semibold">Skor</th>
+              <th class="px-4 py-2 text-right text-gray-600 font-semibold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="studentTable">
+            <% gdpStudents.forEach(student => { %>
+              <tr class="border-b border-gray-200 hover:bg-gray-100"  data-name="<%= student.nama.toLowerCase() %>">
+                <td class="px-4 py-2 text-gray-700 font-semibold font-poppins"><%= student.nama %></td>
+                <td class="px-4 py-2 text-gray-700 font-semibold font-manrope"><%= student.skor %></td>
+                <td class="px-4 py-2 flex space-x-2 justify-center">
+                    <form action="/profile/<%= student.uid %>" method="GET" class="flex items-center">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Lihat Profil</button>
+                    </form>
+                  </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tabel DPP (Non Garuda) -->
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4 mt-3">Dewan Penggalang Pramuka (Non Garuda)</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto border-collapse border border-gray-300 rounded-lg w-full mx-auto">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 text-left text-gray-600 font-semibold">Nama</th>
+              <th class="px-4 py-2 text-left text-gray-600 font-semibold">Skor</th>
+              <th class="px-4 py-2 text-right text-gray-600 font-semibold">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="studentTable">
+            <% dppStudents.forEach(student => { %>
+              <tr class="border-b border-gray-200 hover:bg-gray-100"  data-name="<%= student.nama.toLowerCase() %>">
+                <td class="px-4 py-2 text-gray-700 font-semibold font-poppins"><%= student.nama %></td>
+                <td class="px-4 py-2 text-gray-700 font-semibold font-manrope"><%= student.skor %></td>
+                <td class="px-4 py-2 flex space-x-2 justify-center">
+                  <form action="/update-skor" method="GET" class="flex items-center">
+                    <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
+                    <button type="submit" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Lihat Profil</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/javascripts/skor.js"></script>
+  <%- include('layout/footers/stickyFooter') %>

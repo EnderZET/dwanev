@@ -4,7 +4,8 @@
 
 /* Gaya scrollbar untuk browser berbasis WebKit (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
-    height: 4px; /* Lebar scrollbar */
+    height: 6px; /* Lebar scrollbar */
+    width: 4px;
   }
   
   ::-webkit-scrollbar-track {
@@ -19,5 +20,10 @@
   
   ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(to right, #3a78c2, #D1F8EF); /* Warna hover */
+  }
+  
+  .highlight {
+    background-color: #bfdbfe; /* Warna biru muda */
+    transition: background-color 1s ease-in-out; /* Animasi perubahan warna */
   }
   

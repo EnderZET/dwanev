@@ -38,8 +38,8 @@
               <div class="inline relative">
                 <button
                   type="button"
-                  class="inline-flex items-center relative left-8 px-2 h-10 w-10 border rounded-full hover:shadow-lg"
-                  onclick="toggleDropdown()"
+                  class="inline-flex items-center relative left-8 px-2 h-10 w-10 rounded-full hover:shadow-lg"
+                  onclick="<%= (typeof perm !== 'undefined' && perm === 'admin') ? 'toggleDropdown()' : 'toggleDropdown2()' %> "
                 >
                   <div class="pl-1">
                     <svg

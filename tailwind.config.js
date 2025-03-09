@@ -1,6 +1,6 @@
-const colors = require('tailwindcss/colors')
+import colors from 'tailwindcss/colors';
 
-module.exports = {
+export default {
     content: [
         "./public/*/**.{html,js,css,png}",
         "./views/*.ejs",
@@ -38,8 +38,6 @@ module.exports = {
                     '900': '#21332c',
                     '950': '#121c19',
                 },
-
-
                 ...colors,
             }
         },
@@ -50,4 +48,4 @@ module.exports = {
             autoprefixer: {},
         },
     ],
-}
+};
