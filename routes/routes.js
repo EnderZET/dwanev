@@ -1,9 +1,12 @@
-const express = require("express");
+import express from "express";
+import { pool as connection, poolSkor as connectionSkor } from "../src/database.js";
+import crypto from "crypto";
+import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+import axios from "axios";
+import he from "he";
+dotenv.config();
 const router = express.Router();
-const {pool: connection, poolSkor: connectionSkor} = require("../src/database");
-const crypto = require("crypto");
-const bcrypt = require("bcrypt");
-const request = require("sync-request");
 const SECRET_KEY = process.env.SECRET_KEY;
 const COOKIE_NAME = process.env.COOKIE_NAME;
 
@@ -126,8 +129,26 @@ const getWBSCounter = (date) => {
   return counter;
 };
 
+
+
+
+
+
+
+
+
+
+
+
 // Main Router
 router.get("/export", requireAuth, async (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   connection.query(
     `
     SELECT udt, udtmonth, udtyear, situation, reporttitle, reportagent, 
@@ -226,10 +247,10 @@ router.post('/login', async (req, res) => {
                       delete req.session.alertMessage;
                       return res.render('login', { alertMessage, title: "Login | DEWANEV" });
                   }
-                  const token = generateAuthToken(); // Buat token autentikasi
+                  const token = generateAuthToken(user.perm); // Buat token autentikasi
                   res.cookie(COOKIE_NAME, token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 }); // Simpan cookie
                   delete req.session.alertMessage;
-                  return res.redirect('/dashboard');
+                  return res.redirect('/');
               });
           });
           return;
@@ -268,6 +289,13 @@ router.get("/logout", (req, res) => {
 
 // Lapor routers
 router.get("/lapor", requireAuth, (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   res.render("lapor", {
     title: "Lapor | DEWANEV",
     csrfToken: res.locals.csrfToken,
@@ -275,6 +303,13 @@ router.get("/lapor", requireAuth, (req, res) => {
 });
 
 router.post("/lapor", requireAuth, (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   let {
     reportTitle,
     knownTimeHappened,
@@ -343,6 +378,13 @@ router.post("/lapor", requireAuth, (req, res) => {
 
 // Edit routers
 router.get("/edit/:uid", requireAuth, (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   const uid = req.params.uid;
   connection.query(
     "SELECT * FROM LaporanTable WHERE uid = $1",
@@ -359,6 +401,13 @@ router.get("/edit/:uid", requireAuth, (req, res) => {
 });
 
 router.post("/edit/:uid", requireAuth, (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   const uid = req.params.uid;
   const {
     reportTitle,
@@ -422,6 +471,13 @@ router.post("/edit/:uid", requireAuth, (req, res) => {
   );
 });
 router.post("/verify", requireAuth, (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   const uid = req.body.uid;
 
   // Proses verifikasi di database...
@@ -454,6 +510,13 @@ router.post("/verify", requireAuth, (req, res) => {
 
 // Verifikasi routers
 router.post("/unverify", requireAuth, (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   const uid = req.body.uid;
 
   // Proses verifikasi di database...
@@ -488,6 +551,13 @@ router.post("/unverify", requireAuth, (req, res) => {
 
 // Delete routers
 router.post("/delete", requireAuth, (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   const { uid } = req.body;
   connection.query(
     "DELETE FROM LaporanTable WHERE uid = $1",
@@ -519,6 +589,13 @@ router.post("/delete", requireAuth, (req, res) => {
 
 // Dashboard routers
 router.get("/dashboard", requireAuth, async (req, res) => {
+  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+    req.session.alertMessage = {
+      type: "error",
+      message: "Anda tidak memiliki akses ke halaman ini!",
+    };
+    return res.redirect("/");
+  }
   const sortOption = req.query.sort || "latest"; // Default: terbaru
   let orderByClause = "ORDER BY uploadtime DESC"; // Default: terbaru
   
@@ -562,6 +639,7 @@ router.get("/dashboard", requireAuth, async (req, res) => {
     const results = await connection.query(dataQuery, [`%${search}%`, limit, offset]);
   
     res.render("dashboard", {
+      perm: req.session.RedAgateIsBeautiful,
       data: results.rows,
       totalPages,
       currentPage: page,
@@ -583,14 +661,14 @@ router.get("/dashboard", requireAuth, async (req, res) => {
 // Skor Web
 
 // Route untuk menampilkan halaman skor
-router.get('/skor', async (req, res) => {
+router.get('/skor', requireAuth, async (req, res) => {
   const { sortBy } = req.query; // Mendapatkan parameter query dari dropdown
 
   let orderClause = 'ORDER BY nama'; // Default sorting (alfabet)
   if (sortBy === 'score_asc') {
     orderClause = 'ORDER BY skor ASC'; // Skor terendah
   } else if (sortBy === 'score_desc') {
-    orderClause = 'ORDER BY score DESC'; // Skor tertinggi
+    orderClause = 'ORDER BY skor DESC'; // Skor tertinggi
   } else if (sortBy === 'name_desc') {
     orderClause = 'ORDER BY nama DESC'; // Alfabet terbalik
   }
@@ -607,53 +685,131 @@ router.get('/skor', async (req, res) => {
     const dppStudents = dppResult.rows;
 
     // Render halaman skor dengan data siswa
-    res.render('skor-admin', { csrfToken: res.locals.csrfToken, gdStudents, gdpStudents, dppStudents, sortBy, title: "Skor | DEWANEV", perm: req.session.RedAgateIsBeautiful });
+    res.render('skor', { csrfToken: res.locals.csrfToken, gdStudents, gdpStudents, dppStudents, sortBy, title: "Skor | DEWANEV", perm: req.session.RedAgateIsBeautiful });
   } catch (err) {
     console.error('Error fetching data:', err);
     res.status(500).send('Error fetching data');
   }
 });
 
-// Route untuk memperbarui skor
-router.post('/update-score', async (req, res) => {
-  const { studentId, action } = req.body;
 
-  try {
-    // Ambil skor siswa yang akan diperbarui
-    const result = await client.query('SELECT * FROM skor WHERE id = $1', [studentId]);
+router.post('/update-score-add/:id', requireAuth, async (req, res) => {
+  const { id } = req.params;
+  const { dropdown } = req.body;
+
+  axios.get(`https://api.github.com/gists/${process.env.GIST_ID}`, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}})
+  .then(async response => {
+    const gist = response.data;
+    const fileContent = gist.files[process.env.GIST_FN].content
+
+    const penalties = JSON.parse(fileContent);
+
+    const result = await connectionSkor.query('SELECT * FROM skor WHERE uid = $1', [id]);
     const student = result.rows[0];
 
-    if (student) {
-      let newScore = student.score;
-
+    if (student && penalties[dropdown]) {
+      let cskor = student.skor;
       // Perbarui skor sesuai aksi
-      if (action === 'increase') {
-        newScore += 10;  // Menambah skor 10
-      } else if (action === 'decrease') {
-        newScore -= 10;  // Mengurangi skor 10
-      }
 
       // Update skor di database
-      await client.query('UPDATE skor SET score = $1 WHERE id = $2', [newScore, studentId]);
+      await connectionSkor.query('UPDATE skor SET skor = $1 WHERE uid = $2', [cskor+penalties[dropdown], id]);
     }
 
     // Kembali ke halaman skor dengan data yang diperbarui
-    res.redirect('/skor');
-  } catch (err) {
+    res.redirect('/profile/' + id);
+  })
+  .catch (err => {
     console.error('Error updating score:', err);
     res.status(500).send('Error updating score');
-  }
+  });
 });
 
-module.exports = router;
+function getScoreColor(score) {
+  if (score >= 25) return 'text-emerald-600'; // Hijau (30-25)
+  if (score >= 20) return 'text-lime-600'; // Hijau muda (20-24)
+  if (score >= 15) return 'text-yellow-600'; // Kuning (15-19)
+  if (score >= 10) return 'text-orange-600'; // Oranye (10-14)
+  if (score >= 5) return 'text-red-600'; // Oranye kemerahan (5-9)
+  return 'text-red-600'; // Merah (0-4)
+}
 
 
 
+router.get('/profile/:id', requireAuth, (req, res) => {
+  connectionSkor.query('SELECT * FROM skor WHERE uid = $1', [req.params.id], (err, resultsSkor) => {
+    connection.query('SELECT * FROM laporantable WHERE reportguilties ILIKE $1', [`%${resultsSkor.rows[0].nama}%`], (err, results) => {
+      axios.get(`https://api.github.com/gists/${process.env.GIST_ID}`, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}})
+      .then(response => {
+        const gist = response.data;
+        const fileContent = gist.files[process.env.GIST_FN].content
+        res.render('profile', {
+          title: "Profile | DEWANEV",
+          student: resultsSkor.rows[0],
+          panduan: he.decode(fileContent),
+          getScoreColor,
+          perm: req.session.RedAgateIsBeautiful,
+          trackrecords: results.rows,
+          csrfToken: res.locals.csrfToken,
+        });
+        if (err) {
+          req.session.alertMessage = {
+            type: "error",
+            message: "Gagal mengambil data! CodeError: " + err.message,
+          };
+          return res.redirect('/skor');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching Gist:', error);
+      });
+    });
+    if (err) {
+      req.session.alertMessage = {
+        type: "error",
+        message: "Gagal mengambil data! CodeError: " + err.message,
+      };
+      return res.redirect('/skor');
+    }
 
+  });
+});
+
+
+// Route untuk memperbarui skor
+router.post('/update-score-sub/:id', requireAuth, async (req, res) => {
+  const { id } = req.params;
+  const { dropdown } = req.body;
+
+  axios.get(`https://api.github.com/gists/${process.env.GIST_ID}`, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}})
+  .then(async response => {
+    const gist = response.data;
+    const fileContent = gist.files[process.env.GIST_FN].content
+
+    const penalties = JSON.parse(fileContent);
+
+    const result = await connectionSkor.query('SELECT * FROM skor WHERE uid = $1', [id]);
+    const student = result.rows[0];
+
+    if (student && penalties[dropdown]) {
+      let cskor = student.skor;
+      // Perbarui skor sesuai aksi
+
+      // Update skor di database
+      await connectionSkor.query('UPDATE skor SET skor = $1 WHERE uid = $2', [cskor-penalties[dropdown], id]);
+    }
+
+    // Kembali ke halaman skor dengan data yang diperbarui
+    res.redirect('/profile/' + id);
+  })
+  .catch (err => {
+    console.error('Error updating score:', err);
+    res.status(500).send('Error updating score');
+  });
+});
 
 
 router.use("/ada_sesuatu_yang_aneh", (req, res) => {
   res.render("error", { error: 500, title: "??? | DEWANEV", easter_egg: true });
 });
 
-module.exports = router;
+export default router;

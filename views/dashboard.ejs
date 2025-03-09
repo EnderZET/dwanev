@@ -25,7 +25,7 @@ function formatDate(dateString) {
         <button class="w-24 h-10 bg-black/80 mb-3 font-poppins font-extrabold text-white  rounded-md" onclick="window.location.replace('/export')">Ekspor</button>
     
         <!-- Search & Filter -->
-        <div class="mb-4 grid grid-cols-1 sm:grid-cols-4 gap-3 font-manrope font-bold">
+        <!-- <div class="mb-4 grid grid-cols-1 sm:grid-cols-4 gap-3 font-manrope font-bold">
             <select id="searchType" class="border p-2 rounded w-full  cursor-pointer">
                 <option value="all">Universal</option>
                 <option value="uid">UID</option>
@@ -33,15 +33,20 @@ function formatDate(dateString) {
                 <option value="timeHappened">Waktu Kejadian</option>
                 <option value="guilties">Terdakwa</option>
                 <option value="agent">Pelapor</option>
-            </select>
-            <input type="text" id="searchInput" placeholder="Cari Data" class="border p-2 rounded w-full" />
+            </select> -->
+            <!-- <form action="/dashboard" method="GET">
+                <input type="hidden" name="_csrf" id="csrfToken" value="<%= csrfToken %>">
+                <input type="text" id="searchInput" name="search" placeholder="Cari Data" class="border p-2 rounded w-full" />
+                <button>Submit Form</button>
             <label class="flex items-center gap-2">
                 <input type="checkbox" id="filterVerified" class="w-5 h-5  cursor-pointer" /> Terverifikasi
             </label>
             <label class="flex items-center gap-2">
                 <input type="checkbox" id="filterEdited" class="w-5 h-5  cursor-pointer" /> Telah Diedit
             </label>
-        </div>
+            </form> -->
+
+        <!-- </div> -->
     
         <!-- Responsive Table -->
         <div class="mb-4 flex items-center gap-2 font-manrope font-bold">
@@ -55,18 +60,18 @@ function formatDate(dateString) {
               <option value="verified">Terverifikasi Dulu</option>
             </select>
           </div>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto overflow-y-auto max-h-92">
             <table class="w-full border-collapse border table-auto text-xs sm:text-sm">
                 <thead>
                     <tr class="bg-black/80 text-white text-xs sm:text-sm">
                         <th class="border p-2">UID</th>
                         <th class="border p-2">Pertemuan</th>
-                        <th class="border p-2">Nama Laporan</th>
+                        <th class="border p-2 min-w-[250px] whitespace-nowrap">Nama Laporan</th>
                         <th class="border p-2">Tipe</th>
                         <th class="border p-2">Kejadian</th>
                         <th class="border p-2">Terdakwa</th>
                         <th class="border p-2">Pelapor</th>
-                        <th class="border p-2">Alasan</th>
+                        <th class="border p-2 min-w-[250px] whitespace-nowrap">Alasan</th>
                         <th class="border p-2">Pramuka?</th>
                         <th class="border p-2">Verifikasi</th>
                         <th class="border p-2">Diedit?</th>

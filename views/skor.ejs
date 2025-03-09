@@ -9,7 +9,14 @@
     <div class="w-full max-w-4xl bg-white/70 backdrop-blur-md rounded-lg shadow-lg p-6">
 
       <!-- Judul -->
-      <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Daftar Skor Siswa</h1>
+      <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 pt-6">Daftar Skor Siswa</h1>
+
+      <!-- Form Pencarian -->
+      <div class="mb-4 flex justify-center items-center space-x-2">
+        <input type="text" id="searchInput" placeholder="Cari berdasarkan nama..." class="px-4 py-2 border rounded-lg text-sm sm:text-base w-64">
+        <button onclick="searchAndScroll()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Cari</button>
+      </div>
+      <p class="text-red-700 text-center hidden transition-all" id="error-search-nfound">Nama tidak ditemukan!</p>
 
       <!-- Form Dropdown untuk Sortir -->
       <form action="/skor" method="GET" class="mb-4 flex justify-center">
@@ -34,25 +41,17 @@
               <th class="px-4 py-2 text-right text-gray-600 font-semibold">Aksi</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="studentTable">
             <% gdStudents.forEach(student => { %>
-              <tr class="border-b border-gray-200 hover:bg-gray-100">
+              <tr class="border-b border-gray-200 hover:bg-gray-100"  data-name="<%= student.nama.toLowerCase() %>">
                 <td class="px-4 py-2 text-gray-700 font-semibold font-poppins"><%= student.nama %></td>
                 <td class="px-4 py-2 text-gray-700 font-semibold font-manrope"><%= student.skor %></td>
-                <td class="px-4 py-2 flex space-x-2 justify-end">
-                  <form action="/update-score" method="POST" class="flex items-center">
-                    <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
-
-                    <input type="hidden" name="studentId" value="<%= student.id %>">
-                    <button type="submit" name="action" value="decrease" class="px-4 py-2 bg-red-600 font-bold font-manrope text-white rounded-lg hover:bg-red-700">Kurangi</button>
-                  </form>
-                  <form action="/update-score" method="POST" class="flex items-center">
-                    <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
-
-                    <input type="hidden" name="studentId" value="<%= student.id %>">
-                    <button type="submit" name="action" value="increase" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Tambah</button>
-                  </form>
-                </td>
+                <td class="px-4 py-2 flex space-x-2 justify-center">
+                    <form action="/profile/<%= student.uid %>" method="GET" class="flex items-center">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Lihat Profil</button>
+                    </form>
+                  </td>
               </tr>
             <% }) %>
           </tbody>
@@ -70,25 +69,17 @@
               <th class="px-4 py-2 text-right text-gray-600 font-semibold">Aksi</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="studentTable">
             <% gdpStudents.forEach(student => { %>
-              <tr class="border-b border-gray-200 hover:bg-gray-100">
+              <tr class="border-b border-gray-200 hover:bg-gray-100"  data-name="<%= student.nama.toLowerCase() %>">
                 <td class="px-4 py-2 text-gray-700 font-semibold font-poppins"><%= student.nama %></td>
                 <td class="px-4 py-2 text-gray-700 font-semibold font-manrope"><%= student.skor %></td>
-                <td class="px-4 py-2 flex space-x-2 justify-end">
-                  <form action="/update-score" method="POST" class="flex items-center">
-                    <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
-
-                    <input type="hidden" name="studentId" value="<%= student.id %>">
-                    <button type="submit" name="action" value="decrease" class="px-4 py-2 bg-red-600 font-bold font-manrope text-white rounded-lg hover:bg-red-700">Kurangi</button>
-                  </form>
-                  <form action="/update-score" method="POST" class="flex items-center">
-                    <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
-
-                    <input type="hidden" name="studentId" value="<%= student.id %>">
-                    <button type="submit" name="action" value="increase" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Tambah</button>
-                  </form>
-                </td>
+                <td class="px-4 py-2 flex space-x-2 justify-center">
+                    <form action="/profile/<%= student.uid %>" method="GET" class="flex items-center">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Lihat Profil</button>
+                    </form>
+                  </td>
               </tr>
             <% }) %>
           </tbody>
@@ -106,21 +97,15 @@
               <th class="px-4 py-2 text-right text-gray-600 font-semibold">Aksi</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="studentTable">
             <% dppStudents.forEach(student => { %>
-              <tr class="border-b border-gray-200 hover:bg-gray-100">
+              <tr class="border-b border-gray-200 hover:bg-gray-100"  data-name="<%= student.nama.toLowerCase() %>">
                 <td class="px-4 py-2 text-gray-700 font-semibold font-poppins"><%= student.nama %></td>
                 <td class="px-4 py-2 text-gray-700 font-semibold font-manrope"><%= student.skor %></td>
-                <td class="px-4 py-2 flex space-x-2 justify-end">
-                  <form action="/update-score" method="POST" class="flex items-center">
+                <td class="px-4 py-2 flex space-x-2 justify-center">
+                  <form action="/update-skor" method="GET" class="flex items-center">
                     <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
-                    <input type="hidden" name="studentId" value="<%= student.id %>">
-                    <button type="submit" name="action" value="decrease" class="px-4 py-2 bg-red-600 font-bold font-manrope text-white rounded-lg hover:bg-red-700">Kurangi</button>
-                  </form>
-                  <form action="/update-score" method="POST" class="flex items-center">
-                    <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
-                    <input type="hidden" name="studentId" value="<%= student.id %>">
-                    <button type="submit" name="action" value="increase" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Tambah</button>
+                    <button type="submit" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Lihat Profil</button>
                   </form>
                 </td>
               </tr>
@@ -132,5 +117,5 @@
     </div>
   </div>
 
+  <script src="/javascripts/skor.js"></script>
   <%- include('layout/footers/stickyFooter') %>
-

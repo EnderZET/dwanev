@@ -1,5 +1,7 @@
-const { Pool } = require("pg");
-const dotenv = require("dotenv").config();
+import pkg from 'pg';
+const { Pool } = pkg; 
+import "dotenv/config"; 
+
 
 const pool = new Pool({
   user: process.env.PGUSER,
@@ -26,7 +28,6 @@ pool.connect((err, client, release) => {
   }
 });
 
-
 poolSkor.connect((err, client, release) => {
   if (err) {
     console.error("Error connecting to PostgreSQL Second Database Section:", err);
@@ -36,5 +37,5 @@ poolSkor.connect((err, client, release) => {
   }
 });
 
-
-module.exports = {pool, poolSkor};
+// Export the pools
+export { pool, poolSkor };
