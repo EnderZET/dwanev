@@ -220,13 +220,13 @@ router.post('/login', async (req, res) => {
 
   try {
       // Fetch the first user from controlData
-      const result = await connection.query('SELECT * FROM controlData WHERE username = $1', [username]);
+      const result = await connection.query('SELECT * FROM controldata WHERE username = $1', [username]);
       if (result.rows.length === 0) {
-          req.session.alertMessage = {
+          let alertMessage = {
               type: "error",
-              message: "Terjadi Error! Data tidak ditemukan.",
+              message: "Tidak ada User: "+username,
           };
-          return res.render('login', { alertMessage: req.session.alertMessage, title: "Login | DEWANEV" });
+          return res.render('login', { alertMessage, title: "Login | DEWANEV" });
       }
 
       const user = result.rows[0];
