@@ -40,7 +40,7 @@ function pen2(){
     let projected = document.getElementById('projected2');
 
     projected.classList.remove('hidden');
-    projected.innerHTML = `Skor akhir akan menjadi: ${cskor} + ${penalties[dropdown2.value]} = ${cskor + penalties[dropdown2.value]}`;
+    projected.innerHTML = `Skor akhir akan menjadi: ${cskor} + ${penalties[dropdown2.value]} = ${cskor + parseInt(penalties[dropdown2.value])}`;
 
 }
 
