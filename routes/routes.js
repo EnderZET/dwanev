@@ -798,7 +798,7 @@ router.post('/update-score-sub/:id', requireAuth, async (req, res) => {
       // Perbarui skor sesuai aksi
 
       // Update skor di database
-      await connectionSkor.query('UPDATE skor SET skor = $1 WHERE uid = $2', [cskor-parseInt(penalties[dropdown]), id]);
+      await connectionSkor.query('UPDATE skor SET skor = $1 WHERE uid = $2', [cskor-penalties[dropdown], id]);
     }
 
     // Kembali ke halaman skor dengan data yang diperbarui
