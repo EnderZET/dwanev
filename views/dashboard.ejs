@@ -108,8 +108,8 @@ function formatDate(dateString) {
                         <td class="border p-2 w-32"><%= dat.reporttitle %></td>
                         <td class="border p-2 w-48"><%= typeoflap %></td>
                         <td class="border p-2"><%= dat.knowntimehappened %></td>
-                        <td class="border p-2 break-words"><%- '• ' + dat.reportguilties.split(',').join('<br>• ') %></td>
-                        <td class="border p-2 break-words"><%- '• ' + dat.reportagent.split(',').join('<br>• ') %></td>
+                        <td class="border p-2 break-words"><%- '• ' + dat.reportguilties.replace('\n','').split(',').join('<br>• ') %></td>
+                        <td class="border p-2 break-words"><%- '• ' + dat.reportagent.replace('\n','').split(',').join('<br>• ') %></td>
                         <td class="border p-2 w-56 break-words"><%= dat.reporttypesandcauses %></td>
                         <td class="border p-2 text-center"><%= dat.isonpramday ? "✅" : "❌" %></td>
                         <td class="border p-2 text-center"><%= dat.isverified ? "✅" : "❌" %></td>
