@@ -1,7 +1,6 @@
-<div style="margin: auto;">
-![Proyek-Baru-32-76-B44-EE.png](https://i.postimg.cc/bw6YHkBg/Proyek-Baru-32-76-B44-EE.png)
+<div align="center">
+  <img src="logo.png" width="100" alt="Logo">
 </div>
-
 <h1 align="center">Dewan Evaluasi</h1>
 
 <p align="center">
@@ -24,5 +23,5 @@
 - **GitHub API** – Sinkronisasi dan pencadangan otomatis.
 
 ## ⚡ Penggunaan
-Aplikasi ada [di sini!](https://dwanev-production.up.railway.app)
+<p align="center">Aplikasi ada <a href="https://dwanev-production.up.railway.app">di sini!</a></p>
    
