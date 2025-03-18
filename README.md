@@ -1,6 +1,6 @@
-<p align="center">
+<div align="center">
 [![Proyek-Baru-32-76-B44-EE.png](https://i.postimg.cc/bw6YHkBg/Proyek-Baru-32-76-B44-EE.png)](https://postimg.cc/mPHGTzR1)
-</p>
+</div>
 
 <h1 align="center">Dewan Evaluasi</h1>
 
