@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://i.ibb.co.com/k2gD28pJ/Proyek-Baru-32-76-B44-EE.png" alt="Logo" width="100">
+  ![Logo](https://i.ibb.co.com/k2gD28pJ/Proyek-Baru-32-76-B44-EE.png)
 </p>
 
 <h1 align="center">Dewan Evaluasi</h1>
