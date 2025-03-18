@@ -1,5 +1,5 @@
 <p align="center">
-  ![Logo](https://i.ibb.co.com/k2gD28pJ/Proyek-Baru-32-76-B44-EE.png)
+[![Proyek-Baru-32-76-B44-EE.png](https://i.postimg.cc/bw6YHkBg/Proyek-Baru-32-76-B44-EE.png)](https://postimg.cc/mPHGTzR1)
 </p>
 
 <h1 align="center">Dewan Evaluasi</h1>
