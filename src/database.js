@@ -16,7 +16,7 @@ const poolSkor = new Pool({
   password: process.env.PG2PASSWORD,
   host: process.env.PG2HOST,
   port: process.env.PG2PORT,
-  database: process.env.PGDATABASESSS || "dewanevScores",
+  database: process.env.PGDATABASESSS || "skor",
 });
 
 pool.connect((err, client, release) => {
