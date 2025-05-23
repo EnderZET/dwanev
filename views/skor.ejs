@@ -103,7 +103,7 @@
                 <td class="px-4 py-2 text-gray-700 font-semibold font-poppins"><%= student.nama %></td>
                 <td class="px-4 py-2 text-gray-700 font-semibold font-manrope"><%= student.skor %></td>
                 <td class="px-4 py-2 flex space-x-2 justify-center">
-                  <form action="/update-skor" method="GET" class="flex items-center">
+                  <form action="/profile/<%= student.uid %>" method="GET" class="flex items-center">
                     <input type="hidden" name="_csrfToken" value="<%= csrfToken %>">
                     <button type="submit" class="px-4 py-2 bg-green-700 font-bold font-manrope text-white rounded-lg hover:bg-green-800">Lihat Profil</button>
                   </form>
