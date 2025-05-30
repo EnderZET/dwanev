@@ -1,9 +1,11 @@
 import express from "express";
-import { pool as connection, poolSkor as connectionSkor } from "../src/database.js";
+import {
+  pool as connection,
+  poolSkor as connectionSkor,
+} from "../src/database.js";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import axios from "axios";
 import he from "he";
 dotenv.config();
 const router = express.Router();
@@ -25,6 +27,12 @@ const monthMap = {
   11: "Desember",
 };
 
+function formatScore(score) {
+  console.log(score)
+  const result = Math.round(score * 100) / 100;
+  return Number.isInteger(result) ? result : result;
+}
+
 function generateAuthToken(perm = "score_viewer") {
   const timestamp = Date.now(); // Timestamp untuk mencegah replay attack
   const data = `${perm}.${timestamp}`; // Format token
@@ -42,7 +50,7 @@ function verifyAuthToken(req, token) {
 
   const [perm, timestamp, receivedHmac] = parts;
   const data = `${perm}.${timestamp}`;
-  req.session.RedAgateIsBeautiful=perm;
+  req.session.RedAgateIsBeautiful = perm;
 
   // Cek apakah token sudah kedaluwarsa
   const tokenTime = parseInt(timestamp, 10);
@@ -66,7 +74,8 @@ function requireAuth(req, res, next) {
     res.clearCookie(COOKIE_NAME); // Hapus cookie jika tidak valid
     req.session.alertMessage = {
       type: "error",
-      message: "Sesi Anda telah kadaluarsa/Anda tidak memiliki akses, silakan login kembali!",
+      message:
+        "Sesi Anda telah kadaluarsa/Anda tidak memiliki akses, silakan login kembali!",
     };
     return res.redirect("/login");
   }
@@ -129,20 +138,9 @@ const getWBSCounter = (date) => {
   return counter;
 };
 
-
-
-
-
-
-
-
-
-
-
-
 // Main Router
 router.get("/export", requireAuth, async (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
@@ -159,8 +157,11 @@ router.get("/export", requireAuth, async (req, res) => {
     `,
     (err, results) => {
       if (err) {
-        req.session.alertMessage = { type: "error", message: "Gagal mengambil data! Errorcode: "+err.message}
-        res.redirect('/dashboard');
+        req.session.alertMessage = {
+          type: "error",
+          message: "Gagal mengambil data! Errorcode: " + err.message,
+        };
+        res.redirect("/dashboard");
       }
 
       let ringkasan = {};
@@ -180,22 +181,28 @@ router.get("/export", requireAuth, async (req, res) => {
       res.render("export", {
         ringkasan: Object.values(ringkasan),
         title: "Export | DEWANEV",
-        perm: req.session.RedAgateIsBeautiful
+        perm: req.session.RedAgateIsBeautiful,
       });
     }
   );
 });
 
-
 router.get("/about", requireAuth, async (req, res) => {
-  res.render("about", { title: "About | DEWANEV", perm: req.session.RedAgateIsBeautiful });
+  res.render("about", {
+    title: "About | DEWANEV",
+    perm: req.session.RedAgateIsBeautiful,
+  });
 });
 
 router.get("/", requireAuth, async (req, res) => {
   const alertMessage = req.session.alertMessage;
   delete req.session.alertMessage;
 
-  res.render("index", { alertMessage, title: "Home | DEWANEV", perm: req.session.RedAgateIsBeautiful });
+  res.render("index", {
+    alertMessage,
+    title: "Home | DEWANEV",
+    perm: req.session.RedAgateIsBeautiful,
+  });
 });
 
 router.get("/login", (req, res) => {
@@ -216,73 +223,79 @@ router.get("/login", (req, res) => {
   });
 });
 
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-      // Fetch the first user from controlData
-      const result = await connection.query('SELECT * FROM controldata WHERE username = $1', [username]);
-      if (result.rows.length === 0) {
-          let alertMessage = {
+    // Fetch the first user from controlData
+    const result = await connection.query(
+      "SELECT * FROM controldata WHERE username = $1",
+      [username]
+    );
+    if (result.rows.length === 0) {
+      let alertMessage = {
+        type: "error",
+        message: "Tidak ada User: " + username,
+      };
+      return res.render("login", { alertMessage, title: "Login | DEWANEV" });
+    }
+
+    const user = result.rows[0];
+
+    if (user.username === username && bcrypt.compareSync(password, user.pwd)) {
+      req.session.user = { username }; // Simpan di session
+
+      const saltRounds = 10;
+      bcrypt.genSalt(saltRounds, function (err, salt) {
+        bcrypt.hash("accessGranted", salt, function (err, hash) {
+          if (err) {
+            req.session.alertMessage = {
               type: "error",
-              message: "Tidak ada User: "+username,
-          };
-          return res.render('login', { alertMessage, title: "Login | DEWANEV" });
-      }
+              message: "Terjadi kesalahan saat hashing.",
+            };
+            let alertMessage = req.session.alertMessage;
+            delete req.session.alertMessage;
+            return res.render("login", {
+              alertMessage,
+              title: "Login | DEWANEV",
+            });
+          }
+          const token = generateAuthToken(user.perm); // Buat token autentikasi
+          res.cookie(COOKIE_NAME, token, {
+            httpOnly: true,
+            maxAge: 1000 * 60 * 60 * 24,
+          }); // Simpan cookie
+          delete req.session.alertMessage;
+          return res.redirect("/");
+        });
+      });
+      return;
+    }
 
-      const user = result.rows[0];
-
-
-      if (user.username === username && bcrypt.compareSync(password, user.pwd)) {
-          req.session.user = { username }; // Simpan di session
-
-          const saltRounds = 10;
-          bcrypt.genSalt(saltRounds, function (err, salt) {
-              bcrypt.hash("accessGranted", salt, function (err, hash) {
-                  if (err) {
-                      req.session.alertMessage = {
-                          type: "error",
-                          message: "Terjadi kesalahan saat hashing.",
-                      };
-                      let alertMessage = req.session.alertMessage;
-                      delete req.session.alertMessage;
-                      return res.render('login', { alertMessage, title: "Login | DEWANEV" });
-                  }
-                  const token = generateAuthToken(user.perm); // Buat token autentikasi
-                  res.cookie(COOKIE_NAME, token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 }); // Simpan cookie
-                  delete req.session.alertMessage;
-                  return res.redirect('/');
-              });
-          });
-          return;
-      }
-
-      let alertMessage = {
-          type: "error",
-          message: "Username / Kata Sandi Salah!",
-      };
-      res.render('login', { alertMessage, title: "Login | DEWANEV" });
-
+    let alertMessage = {
+      type: "error",
+      message: "Username / Kata Sandi Salah!",
+    };
+    res.render("login", { alertMessage, title: "Login | DEWANEV" });
   } catch (err) {
-      let alertMessage = {
-          type: "error",
-          message: "Terjadi Error! CodeError: " + err.message,
-      };
-      res.render('login', { alertMessage, title: "Login | DEWANEV" });
+    let alertMessage = {
+      type: "error",
+      message: "Terjadi Error! CodeError: " + err.message,
+    };
+    res.render("login", { alertMessage, title: "Login | DEWANEV" });
   }
 });
-
 
 // Logout: Hapus session dan cookie
 router.get("/logout", (req, res) => {
   res.clearCookie(COOKIE_NAME);
   req.session.destroy((err) => {
-    if (err){
+    if (err) {
       req.session.alertMessage({
         type: "error",
-        message: "Tidak bisa log-out: "+err.message,
-      })
-      return res.redirect('/')
+        message: "Tidak bisa log-out: " + err.message,
+      });
+      return res.redirect("/");
     }
     res.redirect("/login");
   });
@@ -290,7 +303,7 @@ router.get("/logout", (req, res) => {
 
 // Lapor routers
 router.get("/lapor", requireAuth, (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
@@ -300,29 +313,33 @@ router.get("/lapor", requireAuth, (req, res) => {
   res.render("lapor", {
     title: "Lapor | DEWANEV",
     csrfToken: res.locals.csrfToken,
-    perm: req.session.RedAgateIsBeautiful
+    perm: req.session.RedAgateIsBeautiful,
+    penalties: he.decode(res.locals.p2),
   });
 });
 
 router.post("/lapor", requireAuth, (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
     };
     return res.redirect("/");
   }
+  console.log(req.body);
   let {
     reportTitle,
     knownTimeHappened,
     reportGuilties,
+    violations,
     reportAgent,
     reportTypesAndCauses,
     isPramuka,
     situation,
     isVerified,
   } = req.body;
-  
+
+  console.log(req.body);
   isVerified = isVerified === "on";
   let udt = getWBSCounter(knownTimeHappened);
   let isOnPramDay = isPramuka === "on";
@@ -334,9 +351,9 @@ router.post("/lapor", requireAuth, (req, res) => {
     `INSERT INTO laporantable 
     (uid, udt, udtmonth, udtyear, situation, uploadtime, knowntimehappened, 
     reporttitle, reportguilties, reportagent, isverified, isonpramday, 
-    reporttypesandcauses, isedited) 
+    reporttypesandcauses, isedited, tipePelanggaran) 
     VALUES 
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
     [
       generateRandomString(16),
       udt,
@@ -352,6 +369,7 @@ router.post("/lapor", requireAuth, (req, res) => {
       isOnPramDay,
       reportTypesAndCauses,
       false,
+      violations ? violations.join(", ") : "", // Pastikan tipePelanggaran diisi jika ada
     ],
     (err, results) => {
       if (err) {
@@ -380,7 +398,7 @@ router.post("/lapor", requireAuth, (req, res) => {
 
 // Edit routers
 router.get("/edit/:uid", requireAuth, (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
@@ -397,14 +415,14 @@ router.get("/edit/:uid", requireAuth, (req, res) => {
         title: "Edit Report | DEWANEV",
         data: results.rows[0],
         csrfToken: res.locals.csrfToken,
-        perm: req.session.RedAgateIsBeautiful
+        perm: req.session.RedAgateIsBeautiful,
       });
     }
   );
 });
 
 router.post("/edit/:uid", requireAuth, (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
@@ -474,7 +492,7 @@ router.post("/edit/:uid", requireAuth, (req, res) => {
   );
 });
 router.post("/verify", requireAuth, (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
@@ -483,78 +501,300 @@ router.post("/verify", requireAuth, (req, res) => {
   }
   const uid = req.body.uid;
 
-  // Proses verifikasi di database...
+  // Kita perlu olah Guilties
+  // - Awalnya kan: NAMA   KELAS   (STATUS)
+  // - Contoh: Asomaso 7K (GDP)
   connection.query(
-    "UPDATE laporantable SET isverified = TRUE WHERE uid = $1",
+    "SELECT reportguilties, tipepelanggaran, isonpramday FROM laporantable WHERE uid = $1",
     [uid],
-    (err, results) => {
+    async (err, results) => {
       if (err) {
         req.session.alertMessage = {
           type: "error",
-          message: "Gagal memverifikasi laporan! CodeError: " + err.message,
+          message: "Gagal mengambil data laporan! CodeError: " + err.message,
         };
         return res.redirect("/dashboard");
       }
-      if (results.rowCount > 0) {
-        req.session.alertMessage = {
-          type: "success",
-          message: "Laporan berhasil diverifikasi!",
-        };
-      } else {
+      if (results.rowCount === 0) {
         req.session.alertMessage = {
           type: "error",
-          message: "Laporan tidak ditemukan atau sudah diverifikasi!",
+          message: "Laporan tidak ditemukan!",
         };
+        return res.redirect("/dashboard");
       }
-      res.redirect("/dashboard");
+
+      const reportGuilties = results.rows[0].reportguilties;
+      const tipePelanggaran = results.rows[0].tipepelanggaran;
+      const apakahSaatPramuka = Boolean(results.rows[0].isonpramday);
+
+
+      // Asumsi penalties sudah didecode di res.locals.p2
+      const penalties = res.locals.penalties;
+
+      // Pisah nama terdakwa (misal "1. Iqbal Ramdhan, 2. Yusuf Hasibuan")
+      // dan hapus nomor depan "1.", "2." dll
+      const guiltiesArray = reportGuilties
+        .split(",")
+        .map((g) => g.trim().replace(/^\d+\.\s*/, ""));
+
+      try {
+        let min;
+        for (const input of guiltiesArray) {
+          // Ambil status dari dalam ()
+          const statusMatch = input.match(/\(([^)]+)\)$/);
+          const status = statusMatch ? statusMatch[1] : "";
+
+          // Hapus kelas + status (misal ' 7B (GDP)') dari input untuk dapat nama bersih
+          const nama = input.replace(/\s*\d+[A-Z]?\s*\([^)]+\)$/, "").trim();
+          // console.log(`<<<<<<<<<<<<<<<<<<<< Base input: ${input}`)
+          // console.log(`>>>>>>>>>>>>>>>>>>>> Terdeteksi nama: ${nama} dengan status: ${status}`);
+
+
+          // Ambil skor sekarang dari DB
+          const skorResults = await new Promise((resolve, reject) => {
+            connectionSkor.query(
+              "SELECT skor FROM skor WHERE nama = $1",
+              [nama],
+              (err, skorResults) => {
+                if (err) return reject(err);
+                resolve(skorResults);
+              }
+            );
+          });
+
+          if (skorResults.rowCount === 0) {
+            req.session.alertMessage = {
+              type: "error",
+              message: "Data skor tidak ditemukan untuk nama: " + nama,
+            };
+            return res.redirect("/dashboard");
+          }
+
+          let currentScore = skorResults.rows[0].skor;
+
+          // Kurangi skor berdasarkan tipePelanggaran
+          if (tipePelanggaran) {
+            tipePelanggaran.split(",").forEach((pelanggaran) => {
+              pelanggaran = pelanggaran.trim();
+              console.log('==============================')
+              if (penalties[pelanggaran]) {
+                let pelg = parseInt(penalties[pelanggaran].poin);
+                if (status === "GDP") {
+                  console.log(`Name: ${nama} adalah GDP maka dikali 1.25 (${pelg} * 1.25 = ${pelg*1.25})`);
+                  min = pelg * 1.25;
+                }else if (status === "GD") {
+                  min = pelg * 1.15;
+                  console.log(`Name: ${nama} adalah GARUDA maka dikali 1.15 (${pelg} * 1.15 = ${pelg*1.15})`);
+
+                }else{
+                  min = pelg;
+                }
+                min = apakahSaatPramuka ? min*1.08 : min;
+                // console.log(`Name: ${nama}, Pelanggaran: ${pelanggaran}, Poin Awal: ${currentScore}, Min: ${(apakahSaatPramuka) ? min*1.08 : min} Hasil: ${currentScore - ((apakahSaatPramuka) ? min*1.08 : min)}`);
+                // console.log(`Pelanggaran: ${pelanggaran}, poin asli: ${pelg}`);
+
+                currentScore -= min;
+                min = undefined;
+              }
+            });
+          }
+
+          // Update skor di DB
+          await new Promise((resolve, reject) => {
+            connectionSkor.query(
+              "UPDATE skor SET skor = $1 WHERE nama = $2",
+              [formatScore(currentScore), nama],
+              (err) => {
+                if (err) return reject(err);
+                resolve();
+              }
+            );
+          });
+        }
+
+        // Setelah semua selesai, update status laporan verified
+        connection.query(
+          "UPDATE laporantable SET isverified = TRUE WHERE uid = $1",
+          [uid],
+          (err, results) => {
+            if (err) {
+              req.session.alertMessage = {
+                type: "error",
+                message:
+                  "Gagal memverifikasi laporan! CodeError: " + err.message,
+              };
+              return res.redirect("/dashboard");
+            }
+            if (results.rowCount > 0) {
+              req.session.alertMessage = {
+                type: "success",
+                message: "Laporan berhasil diverifikasi!",
+              };
+            } else {
+              req.session.alertMessage = {
+                type: "error",
+                message: "Laporan tidak ditemukan atau sudah diverifikasi!",
+              };
+            }
+            res.redirect("/dashboard");
+          }
+        );
+      } catch (error) {
+        req.session.alertMessage = {
+          type: "error",
+          message: "Terjadi kesalahan proses: " + error.message,
+        };
+        return res.redirect("/dashboard");
+      }
     }
   );
+
+
 });
 
-// Verifikasi routers
 router.post("/unverify", requireAuth, (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
     };
     return res.redirect("/");
   }
+
   const uid = req.body.uid;
 
-  // Proses verifikasi di database...
   connection.query(
-    'UPDATE LaporanTable SET "isverified" = false WHERE "uid" = $1',
+    "SELECT reportguilties, tipepelanggaran, isonpramday FROM laporantable WHERE uid = $1",
     [uid],
-    (err, results) => {
+    async (err, results) => {
       if (err) {
         req.session.alertMessage = {
           type: "error",
-          message:
-            "Gagal membatalkan verifikasi laporan! CodeError: " + err.message,
+          message: "Gagal mengambil data laporan! CodeError: " + err.message,
         };
         return res.redirect("/dashboard");
       }
-      if (results.rowCount > 0) {
-        req.session.alertMessage = {
-          type: "success",
-          message: "Laporan berhasil dibatalkan verifikasi-Nya!",
-        };
-      } else {
+
+      if (results.rowCount === 0) {
         req.session.alertMessage = {
           type: "error",
-          message: "Laporan tidak ditemukan atau sudah tidak terverifikasi.",
+          message: "Laporan tidak ditemukan!",
         };
+        return res.redirect("/dashboard");
       }
-      res.redirect("/dashboard");
+
+      const reportGuilties = results.rows[0].reportguilties;
+      const tipePelanggaran = results.rows[0].tipepelanggaran;
+      const apakahSaatPramuka = Boolean(results.rows[0].isonpramday);
+
+      const penalties = res.locals.penalties;
+
+      const guiltiesArray = reportGuilties
+        .split(",")
+        .map((g) => g.trim().replace(/^\d+\.\s*/, ""));
+
+      try {
+        let min, bonus;
+        [min, bonus] = [0, 0];
+        for (const input of guiltiesArray) {
+          const statusMatch = input.match(/\(([^)]+)\)$/);
+          const status = statusMatch ? statusMatch[1] : "";
+
+          const nama = input.replace(/\s*\d+[A-Z]?\s*\([^)]+\)$/, "").trim();
+
+          const skorResults = await new Promise((resolve, reject) => {
+            connectionSkor.query(
+              "SELECT skor FROM skor WHERE nama = $1",
+              [nama],
+              (err, skorResults) => {
+                if (err) return reject(err);
+                resolve(skorResults);
+              }
+            );
+          });
+
+          if (skorResults.rowCount === 0) {
+            req.session.alertMessage = {
+              type: "error",
+              message: "Data skor tidak ditemukan untuk nama: " + nama,
+            };
+            return res.redirect("/dashboard");
+          }
+
+          let currentScore = skorResults.rows[0].skor;
+
+          if (tipePelanggaran) {
+            tipePelanggaran.split(",").forEach((pelanggaran) => {
+              pelanggaran = pelanggaran.trim();
+              if (penalties[pelanggaran]) {
+                let pelg = Number(parseInt(penalties[pelanggaran].poin));
+                min = (status === "GDP") ? pelg * 1.25 :
+                          (status === "GD") ? pelg * 1.15 : pelg;
+                bonus = (apakahSaatPramuka) ? min * 1.08 : min;
+                console.log(`Tipe bonus: ${typeof bonus} (tipe min: ${typeof min}).  BONUS: ${bonus}, MIN: ${min}`);
+                console.log(`Name: ${nama}, Pelanggaran: ${pelanggaran}, Poin: ${currentScore}, Plus: ${(apakahSaatPramuka) ? min*1.08 : min} Hasil: ${currentScore + Number(bonus)}`);
+
+                currentScore += Number(bonus); // Kembalikan skor!
+                [min, bonus] = [0, 0];
+              }
+            });
+          }
+
+          await new Promise((resolve, reject) => {
+            connectionSkor.query(
+              "UPDATE skor SET skor = $1 WHERE nama = $2",
+              [formatScore(currentScore), nama],
+              (err) => {
+                if (err) return reject(err);
+                resolve();
+              }
+            );
+          });
+        }
+
+        // Tandai laporan sebagai tidak terverifikasi
+        connection.query(
+          "UPDATE laporantable SET isverified = FALSE WHERE uid = $1",
+          [uid],
+          (err, results) => {
+            if (err) {
+              req.session.alertMessage = {
+                type: "error",
+                message: "Gagal membatalkan verifikasi! CodeError: " + err.message,
+              };
+              return res.redirect("/dashboard");
+            }
+            if (results.rowCount > 0) {
+              req.session.alertMessage = {
+                type: "success",
+                message: "Verifikasi laporan berhasil dibatalkan!",
+              };
+            } else {
+              req.session.alertMessage = {
+                type: "error",
+                message: "Laporan tidak ditemukan atau belum diverifikasi!",
+              };
+            }
+            res.redirect("/dashboard");
+          }
+        );
+      } catch (error) {
+        req.session.alertMessage = {
+          type: "error",
+          message: "Terjadi kesalahan proses: " + error.message,
+        };
+        return res.redirect("/dashboard");
+      }
     }
   );
 });
+
+
 
 
 // Delete routers
 router.post("/delete", requireAuth, (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
@@ -589,10 +829,9 @@ router.post("/delete", requireAuth, (req, res) => {
   );
 });
 
-
 // Dashboard routers
 router.get("/dashboard", requireAuth, async (req, res) => {
-  if(req.session.RedAgateIsBeautiful == 'score_viewer'){
+  if (req.session.RedAgateIsBeautiful == "score_viewer") {
     req.session.alertMessage = {
       type: "error",
       message: "Anda tidak memiliki akses ke halaman ini!",
@@ -601,7 +840,7 @@ router.get("/dashboard", requireAuth, async (req, res) => {
   }
   const sortOption = req.query.sort || "latest"; // Default: terbaru
   let orderByClause = "ORDER BY uploadtime DESC"; // Default: terbaru
-  
+
   switch (sortOption) {
     case "oldest":
       orderByClause = "ORDER BY uploadtime ASC";
@@ -622,25 +861,28 @@ router.get("/dashboard", requireAuth, async (req, res) => {
       orderByClause = "ORDER BY isverified DESC";
       break;
   }
-  
+
   const alertMessage = req.session.alertMessage;
   delete req.session.alertMessage;
   let page = parseInt(req.query.page) || 1;
   let limit = 8;
   let offset = (page - 1) * limit;
   let search = req.query.search || ""; // Ambil nilai pencarian
-  
-  let countQuery =
-    `SELECT COUNT(*) AS total FROM laporantable WHERE reporttitle ILIKE $1`;
+
+  let countQuery = `SELECT COUNT(*) AS total FROM laporantable WHERE reporttitle ILIKE $1`;
   let dataQuery = `SELECT * FROM laporantable WHERE reporttitle ILIKE $1 ${orderByClause} LIMIT $2 OFFSET $3`;
-  
+
   try {
     const countResult = await connection.query(countQuery, [`%${search}%`]);
     let totalRecords = countResult.rows[0].total;
     let totalPages = Math.ceil(totalRecords / limit);
-  
-    const results = await connection.query(dataQuery, [`%${search}%`, limit, offset]);
-  
+
+    const results = await connection.query(dataQuery, [
+      `%${search}%`,
+      limit,
+      offset,
+    ]);
+
     res.render("dashboard", {
       perm: req.session.RedAgateIsBeautiful,
       data: results.rows,
@@ -660,27 +902,35 @@ router.get("/dashboard", requireAuth, async (req, res) => {
   }
 });
 
-
 // Skor Web
 
 // Route untuk menampilkan halaman skor
-router.get('/skor', requireAuth, async (req, res) => {
+router.get("/skor", requireAuth, async (req, res) => {
   const { sortBy } = req.query; // Mendapatkan parameter query dari dropdown
 
-  let orderClause = 'ORDER BY nama'; // Default sorting (alfabet)
-  if (sortBy === 'score_asc') {
-    orderClause = 'ORDER BY skor ASC'; // Skor terendah
-  } else if (sortBy === 'score_desc') {
-    orderClause = 'ORDER BY skor DESC'; // Skor tertinggi
-  } else if (sortBy === 'name_desc') {
-    orderClause = 'ORDER BY nama DESC'; // Alfabet terbalik
+  let orderClause = "ORDER BY nama"; // Default sorting (alfabet)
+  if (sortBy === "score_asc") {
+    orderClause = "ORDER BY skor ASC"; // Skor terendah
+  } else if (sortBy === "score_desc") {
+    orderClause = "ORDER BY skor DESC"; // Skor tertinggi
+  } else if (sortBy === "name_desc") {
+    orderClause = "ORDER BY nama DESC"; // Alfabet terbalik
   }
 
   try {
     // Ambil data siswa berdasarkan status
-    const gdResult = await connectionSkor.query(`SELECT * FROM skor WHERE status = $1 ${orderClause}`, ['GD']);
-    const gdpResult = await connectionSkor.query(`SELECT * FROM skor WHERE status = $1 ${orderClause}`, ['GDP']);
-    const dppResult = await connectionSkor.query(`SELECT * FROM skor WHERE status = $1 ${orderClause}`, ['DPP']);
+    const gdResult = await connectionSkor.query(
+      `SELECT * FROM skor WHERE status = $1 ${orderClause}`,
+      ["GD"]
+    );
+    const gdpResult = await connectionSkor.query(
+      `SELECT * FROM skor WHERE status = $1 ${orderClause}`,
+      ["GDP"]
+    );
+    const dppResult = await connectionSkor.query(
+      `SELECT * FROM skor WHERE status = $1 ${orderClause}`,
+      ["DPP"]
+    );
 
     // Pisahkan data berdasarkan status
     const gdStudents = gdResult.rows;
@@ -688,128 +938,121 @@ router.get('/skor', requireAuth, async (req, res) => {
     const dppStudents = dppResult.rows;
 
     // Render halaman skor dengan data siswa
-    res.render('skor', { csrfToken: res.locals.csrfToken, gdStudents, gdpStudents, dppStudents, sortBy, title: "Skor | DEWANEV", perm: req.session.RedAgateIsBeautiful });
+    res.render("skor", {
+      csrfToken: res.locals.csrfToken,
+      gdStudents,
+      gdpStudents,
+      dppStudents,
+      sortBy,
+      title: "Skor | DEWANEV",
+      perm: req.session.RedAgateIsBeautiful,
+    });
   } catch (err) {
-    console.error('Error fetching data:', err);
-    res.status(500).send('Error fetching data');
+    console.error("Error fetching data:", err);
+    res.status(500).send("Error fetching data");
   }
 });
 
-
-router.post('/update-score-add/:id', requireAuth, async (req, res) => {
+router.post("/update-score-add/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
   const { dropdown2: dropdown } = req.body;
 
-  axios.get(`https://api.github.com/gists/${process.env.GIST_ID}`, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}})
-  .then(async response => {
-    const gist = response.data;
-    const fileContent = gist.files[process.env.GIST_FN].content
-
-    const penalties = JSON.parse(fileContent);
-
-    const result = await connectionSkor.query('SELECT * FROM skor WHERE uid = $1', [id]);
-    const student = result.rows[0];
-
-    if (student && penalties[dropdown]) {
+  const result = await connectionSkor.query(
+    "SELECT * FROM skor WHERE uid = $1",
+    [id]
+  );
+  const student = result.rows[0];
+  try {
+    if (student && res.locals.penalties[dropdown]) {
       let cskor = student.skor;
       // Perbarui skor sesuai aksi
 
       // Update skor di database
-      await connectionSkor.query('UPDATE skor SET skor = $1 WHERE uid = $2', [cskor+parseInt(penalties[dropdown]), id]);
+      await connectionSkor.query("UPDATE skor SET skor = $1 WHERE uid = $2", [
+        cskor + parseInt(res.locals.penalties[dropdown]),
+        id,
+      ]);
     }
 
     // Kembali ke halaman skor dengan data yang diperbarui
-    res.redirect('/profile/' + id);
-  })
-  .catch (err => {
-    console.error('Error updating score:', err);
-    res.status(500).send('Error updating score');
-  });
+    res.redirect("/profile/" + id);
+  } catch (err) {
+    console.error("Error updating score:", err);
+    res.status(500).send("Error updating score");
+  }
 });
 
 function getScoreColor(score) {
-  if (score >= 25) return 'text-emerald-600'; // Hijau (30-25)
-  if (score >= 20) return 'text-lime-600'; // Hijau muda (20-24)
-  if (score >= 15) return 'text-yellow-600'; // Kuning (15-19)
-  if (score >= 10) return 'text-orange-600'; // Oranye (10-14)
-  if (score >= 5) return 'text-red-600'; // Oranye kemerahan (5-9)
-  return 'text-red-600'; // Merah (0-4)
+  if (score >= 25) return "text-emerald-600"; // Hijau (30-25)
+  if (score >= 20) return "text-lime-600"; // Hijau muda (20-24)
+  if (score >= 15) return "text-yellow-600"; // Kuning (15-19)
+  if (score >= 10) return "text-orange-600"; // Oranye (10-14)
+  if (score >= 5) return "text-red-600"; // Oranye kemerahan (5-9)
+  return "text-red-600"; // Merah (0-4)
 }
 
-
-
-router.get('/profile/:id', requireAuth, (req, res) => {
-  connectionSkor.query('SELECT * FROM skor WHERE uid = $1', [req.params.id], (err, resultsSkor) => {
-    connection.query('SELECT * FROM laporantable WHERE reportguilties ILIKE $1', [`%${resultsSkor.rows[0].nama}%`], (err, results) => {
-      axios.get(`https://api.github.com/gists/${process.env.GIST_ID}`, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}})
-      .then(response => {
-        const gist = response.data;
-        const fileContent = gist.files[process.env.GIST_FN].content
-        res.render('profile', {
-          title: "Profile | DEWANEV",
-          student: resultsSkor.rows[0],
-          panduan: he.decode(fileContent),
-          getScoreColor,
-          perm: req.session.RedAgateIsBeautiful,
-          trackrecords: results.rows,
-          csrfToken: res.locals.csrfToken,
-        });
-        if (err) {
-          req.session.alertMessage = {
-            type: "error",
-            message: "Gagal mengambil data! CodeError: " + err.message,
-          };
-          return res.redirect('/skor');
+router.get("/profile/:id", requireAuth, (req, res) => {
+  connectionSkor.query(
+    "SELECT * FROM skor WHERE uid = $1",
+    [req.params.id],
+    (err, resultsSkor) => {
+      connection.query(
+        "SELECT * FROM laporantable WHERE reportguilties ILIKE $1",
+        [`%${resultsSkor.rows[0].nama}%`],
+        (err, results) => {
+          res.render("profile", {
+            title: "Profile | DEWANEV",
+            student: resultsSkor.rows[0],
+            panduan: he.decode(res.locals.p2),
+            getScoreColor,
+            perm: req.session.RedAgateIsBeautiful,
+            trackrecords: results.rows,
+            csrfToken: res.locals.csrfToken,
+          });
+          if (err) {
+            req.session.alertMessage = {
+              type: "error",
+              message: "Gagal mengambil data! CodeError: " + err.message,
+            };
+            return res.redirect("/skor");
+          }
         }
-      })
-      .catch(error => {
-        console.error('Error fetching Gist:', error);
-      });
-    });
-    if (err) {
-      req.session.alertMessage = {
-        type: "error",
-        message: "Gagal mengambil data! CodeError: " + err.message,
-      };
-      return res.redirect('/skor');
+      );
+      if (err) {
+        req.session.alertMessage = {
+          type: "error",
+          message: "Gagal mengambil data! CodeError: " + err.message,
+        };
+        return res.redirect("/skor");
+      }
     }
-
-  });
+  );
 });
-
 
 // Route untuk memperbarui skor
-router.post('/update-score-sub/:id', requireAuth, async (req, res) => {
+router.post("/update-score-sub/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
   const { dropdown } = req.body;
+  const result = await connectionSkor.query(
+    "SELECT * FROM skor WHERE uid = $1",
+    [id]
+  );
+  const student = result.rows[0];
 
-  axios.get(`https://api.github.com/gists/${process.env.GIST_ID}`, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}})
-  .then(async response => {
-    const gist = response.data;
-    const fileContent = gist.files[process.env.GIST_FN].content
+  if (student && res.locals.penalties[dropdown]) {
+    let cskor = student.skor;
+    // Perbarui skor sesuai aksi
 
-    const penalties = JSON.parse(fileContent);
+    // Update skor di database
+    await connectionSkor.query("UPDATE skor SET skor = $1 WHERE uid = $2", [
+      cskor - res.locals.penalties[dropdown],
+      id,
+    ]);
+  }
 
-    const result = await connectionSkor.query('SELECT * FROM skor WHERE uid = $1', [id]);
-    const student = result.rows[0];
-
-    if (student && penalties[dropdown]) {
-      let cskor = student.skor;
-      // Perbarui skor sesuai aksi
-
-      // Update skor di database
-      await connectionSkor.query('UPDATE skor SET skor = $1 WHERE uid = $2', [cskor-penalties[dropdown], id]);
-    }
-
-    // Kembali ke halaman skor dengan data yang diperbarui
-    res.redirect('/profile/' + id);
-  })
-  .catch (err => {
-    console.error('Error updating score:', err);
-    res.status(500).send('Error updating score');
-  });
+  // Kembali ke halaman skor dengan data yang diperbarui
+  res.redirect("/profile/" + id);
 });
-
 
 router.use("/ada_sesuatu_yang_aneh", (req, res) => {
   res.render("error", { error: 500, title: "??? | DEWANEV", easter_egg: true });

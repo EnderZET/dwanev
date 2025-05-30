@@ -16,7 +16,7 @@ const dropdown = document.getElementById('penalty-dropdown');
 Object.keys(penalties).forEach(key => {
     const option = document.createElement('option');
     option.value = key;
-    option.innerText = key+" | -"+penalties[key]+" poin";
+    option.innerText = penalties[key].pelanggaran+" | -"+penalties[key].poin+" poin";
     dropdown.appendChild(option);
 });
 
@@ -49,7 +49,7 @@ const dropdown2 = document.getElementById('penalty-dropdown2');
 Object.keys(penalties).forEach(key => {
     const option = document.createElement('option');
     option.value = key;
-    option.innerText = key+" | +"+penalties[key]+" poin";
+    option.innerText = penalties[key].pelanggaran+" | +"+penalties[key].poin+" poin";
     dropdown2.appendChild(option);
 });
 

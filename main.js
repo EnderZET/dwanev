@@ -8,6 +8,7 @@ import csurf from "csurf";
 import { Octokit } from "@octokit/rest";
 import cron from "node-cron";
 import routes from './routes/routes.js';
+import axios from "axios";
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
@@ -32,48 +33,6 @@ async function fetchData() {
     return null;
   }
 }
-
-// function upData(data) {
-  
-//   octokit.rest.repos.createOrUpdateFileContents({
-//     owner: process.env.GITHUB_REPO_OWNER,
-//     repo: process.env.GITHUB_REPO_NAME,
-//     path: "backups/laporan.json", // Nama file dan path dalam repositori
-//     message: "Add laporan backup",
-//     content: Buffer.from(JSON.stringify(data.laporanTable, null, 4)).toString("base64"), // Mengonversi JSON ke dalam format base64 untuk API
-//   }).then(response => {
-//     console.log('File laporan.json dibuat atau diperbarui:', response.data);
-//   })
-//   .catch(error => {
-//     console.error('Error (LAPORAN):', error);
-//   });
-//   octokit.rest.repos.createOrUpdateFileContents({
-//     owner: process.env.GITHUB_REPO_OWNER,
-//     repo: process.env.GITHUB_REPO_NAME,
-//     path: "backups/controldata.json", // Nama file dan path dalam repositori
-//     message: "Add control backup",
-//     content: Buffer.from(JSON.stringify(data.controlData, null, 4)).toString("base64"), // Mengonversi JSON ke dalam format base64 untuk API
-//   }).then(response => {
-//     console.log('File controldata.json dibuat atau diperbarui:', response.data);
-//   })
-//   .catch(error => {
-//     console.error('Error (CDATA):', error);
-//   });
-
-//   octokit.rest.repos.createOrUpdateFileContents({
-//     owner: process.env.GITHUB_REPO_OWNER,
-//     repo: process.env.GITHUB_REPO_NAME,
-//     path: "backups/skor.json", // Nama file dan path dalam repositori
-//     message: "Add skor backup",
-//     content: Buffer.from(JSON.stringify(data.skorDb, null, 4)).toString("base64"), // Mengonversi JSON ke dalam format base64 untuk API
-
-//   }).then(response => {
-//     console.log('File skor.json berhasil dibuat atau diperbarui:', response.data);
-//   })
-//   .catch(error => {
-//     console.error('Error (SKOR):', error);
-//   });
-// }
 
 
 async function updateFileContent(path, data, message) {
@@ -161,10 +120,22 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
+
+
+app.use(async (req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
   res.locals.session = req.session;
   res.locals.message = req.session.message;
+  await axios.get(`https://api.github.com/gists/${process.env.GIST_ID}`, {headers: {'Authorization': `token ${process.env.GITHUB_TOKEN}`}})
+    .then(async response => {
+      const gist = response.data;
+      const fileContent = gist.files[process.env.GIST_FN].content
+  
+      const penalties = JSON.parse(fileContent);
+      res.locals.penalties = penalties;
+      res.locals.p2 = fileContent;
+
+    });
   delete req.session.message;
   next();
 });

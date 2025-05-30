@@ -95,7 +95,7 @@ if (confirmVerifyBtn2){
     confirmVerifyBtn2.addEventListener("click", function() {
         const inputText = document.getElementById("verifyInput").value.trim();
     
-        if (inputText === "AKU BERSUMPAH DEMI DP") {
+        if (inputText === "ISTG VRO JUST SUBMIT TS") {
             document.getElementById("verifyForm").submit(); // Kirim form
         } else {
             alert("Kalimat salah! Ulangi dengan benar.");

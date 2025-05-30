@@ -1,0 +1,82 @@
+{
+  "M_ATTITUDE": {
+    "pelanggaran": "Berbicara kasar, Perlakuan tidak senonoh, dan tidak sopan pada saat kegiatan Pramuka",
+    "poin": 0.4
+  },
+  "M_KERAPIAN": {
+    "pelanggaran": "Pakaian tidak rapi/lengkap (Baju keluar, memakai sandal kecuali pada waktu sholat, tidak membawa ---)",
+    "poin": 0.5
+  },
+  "ABUSEBJUPR": {
+    "pelanggaran": "Memakai baju Pramuka saat tidak berkeperluan kegiatan Pramuka",
+    "poin": 1
+  },
+  "PLGN_BERAT": {
+    "pelanggaran": "Terlibat Pelanggaran Berat (seperti minum miras, narkoba)",
+    "poin": 30
+  },
+  "PLG_RINGAN": {
+    "pelanggaran": "Terlibat Pelanggaran Ringan (merokok di Area Sekolah)",
+    "poin": 2
+  },
+  "GKHADIR_3H": {
+    "pelanggaran": "Tidak hadir dalam berbagai kegiatan Pramuka tanpa alasan yang jelas (3 hari tanpa alasan)",
+    "poin": 1
+  },
+  "TIDAK_TAAT": {
+    "pelanggaran": "Membangkang atau Tidak taat pada Pembina",
+    "poin": 0.8
+  },
+  "BERTENGKAR": {
+    "pelanggaran": "Terlibat dalam pertengkaran atau pertarungan",
+    "poin": 2
+  },
+  "BULLYVERB": {
+    "pelanggaran": "Melakukan pembullyan verbal",
+    "poin": 1.5
+  },
+  "BULLYVBFS": {
+    "pelanggaran": "Melakukan pembullyan fisik & verbal",
+    "poin": 4
+  },
+  "BULLYLGKP": {
+    "pelanggaran": "Melakukan pembullyan fisik, verbal, dan ancaman",
+    "poin": 5
+  },
+  "WR_PACARAN": {
+    "pelanggaran": "Berpacaran / HTS / TTM / DLL sesama Dewan Penggalang (peringatan)",
+    "poin": 0.5
+  },
+  "PL_PACARAN": {
+    "pelanggaran": "Berpacaran / HTS / TTM / DLL sesama Dewan Penggalang Tidak diakhiri hubungan dalam 1 bulan/tetap berhubungan secara sembunyi-sembunyi",
+    "poin": 2
+  },
+  "SPAMSTIKER": {
+    "pelanggaran": "Mengirim Stiker berturut-turut ke Grup DPP / Pramuka Garuda",
+    "poin": 0.2
+  },
+  "PORNOGRAFI": {
+    "pelanggaran": "Diketahui menonton atau menyebarkan konten Pornografi",
+    "poin": 2
+  },
+  "BWAHP_WOUT": {
+    "pelanggaran": "Membawa HP ke Sekolah tanpa izin",
+    "poin": 1.2
+  },
+  "INFO_HOAX": {
+    "pelanggaran": "Menyebarkan Hoax atau data yang tidak kredibel",
+    "poin": 1
+  },
+  "TDKBRAGAMA": {
+    "pelanggaran": "Membolos Sholat Dhuha, Sholat Dhuhur, Membatalkan Puasa secara Sengaja dan/atau Pelajaran Ubudiyah",
+    "poin": 0.55
+  },
+  "MNJLKORGANS": {
+    "pelanggaran": "Menjelekkan nama Organisasi Pramuka",
+    "poin": 0.75
+  },
+  "KELUARKLAS": {
+    "pelanggaran": "Keluar kelas saat jam pelajaran",
+    "poin": 0.35
+  }
+}

@@ -4,7 +4,7 @@
 <body class="bg-gradient-to-b from-cyan-100 to-teal-50 m-0 md:h-full md:w-full pb-28 overflow-auto">
     <img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full">
 
-    <div class="max-w-4xl mx-auto bg-white/70 backdrop-blur-lg p-6 shadow rounded">
+    <div class="max-w-4xl mx-auto bg-white/70 backdrop-blur-lg p-6 shadow rounded font-poppins">
         <h2 class="text-2xl font-bold mb-4">Buat Laporan Baru</h2>
         
         <form action="/lapor" method="POST" class="space-y-4" id="kex">
@@ -25,8 +25,17 @@
             <label class="block font-bold">Waktu Kejadian</label>
             <input type="date" name="knownTimeHappened" required class="border p-2 rounded w-full">
             
-            <label class="block font-bold">Terdakwa (Pisahkan dengan koma jika lebih dari satu)<br>  * Misal: Mischa, Keinoke, Jared</label>
+            <label class="block font-bold">Terdakwa (Pisahkan dengan koma jika lebih dari satu)<br> <span class="text-sm font-semibold font-italic text-gray-600">PASTIKAN NAMA SAMA PERSIS DENGAN NAMA YANG ADA DI SKOR<br>Tolong perhatikan format, misal nama: Akhmal Aufa Fairuz Zaky 8E (GDP)<br>1. Setiap nama habis spasi harus huruf kapital<br>2. Setelah nama opsional ada kelas atau tidak (harus kapital, spt: 8E, 8A, 8F)<br>3. Setelah kelas, maka diberi kurung untuk menyertakan  status. WAJIB. Status:<br><span style="display:inline-block; width: 40px;"></span>1. GD - jika terdakwa adalah anggota Garuda non DP.<br><span style="display:inline-block; width: 40px;"></span>2. DPP - Jika terdakwa anggota DPP non Garuda.<br><span style="display:inline-block; width: 40px;"></span>3. GDP - Jika terdakwa anggota Garuda dan DPP.</span></label>
             <input type="text" autocomplete="off" name="reportGuilties" class="border p-2 rounded w-full">
+
+            <!-- Buatkan -->
+            <h2 class="text-xl font-bold mr-8 mt-5 mb-2">Daftar Pelanggaran</h2>
+
+            <div class="max-w-3xl mx-auto mt-4 pb-6">
+                <div id="penaltyChecklist" class="space-y-3"></div>
+
+                </div>
+
             
             <label class="block font-bold">Pelapor (Pisahkan dengan koma jika lebih dari satu)<br>  * Misal: Andre, Rainade, Denoin</label>
             <input type="text" autocomplete="off" name="reportAgent" required class="border p-2 rounded w-full">
@@ -38,13 +47,78 @@
                 <input type="checkbox" name="isPramuka" class="w-5 h-5 mr-2 cursor-pointer">
                 <label class="text-sm">Saat Pramuka?</label>
             </div>
-            <div class="flex items-center">
-                <input type="checkbox" name="isVerified" class="w-5 h-5 mr-2 cursor-pointer">
-                <label class="text-sm">Sudah Terverifikasi?</label>
-            </div>
             
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full" onclick="document.querySelector('#gex').disabled = true; document.querySelector('#kex').submit()" id="gex">Kirim Laporan</button>
         </form>
     </div>
+    <script>
+
+    document.addEventListener("contextmenu", function(e) {
+        e.preventDefault();
+    });
+    document.addEventListener("keydown", function(e) {
+        // F12
+        if (e.key === "F12") e.preventDefault();
+
+        // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+        if (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key.toUpperCase())) {
+            e.preventDefault();
+        }
+
+        // Ctrl+U (View Source)
+        if (e.ctrlKey && e.key.toLowerCase() === "u") {
+            e.preventDefault();
+        }
+        // Ctrl+S (Save Page)
+        if (e.ctrlKey && e.key.toLowerCase() === "s") {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+S (Save As)  
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
+            e.preventDefault();
+        } });
+
+
+
+
+    function decodeHtmlEntity(encodedString) {
+        const doc = new DOMParser().parseFromString(encodedString, 'text/html');
+        return doc.documentElement.textContent || doc.body.textContent;
+    }
+
+    const penalties = JSON.parse(decodeHtmlEntity("<%= penalties %>"));
+    const checklistContainer = document.getElementById("penaltyChecklist");
+
+    let index = 0;
+    Object.keys(penalties).forEach(key => {
+        index++;
+        const checkboxId = `violation-${index}`;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "flex items-start gap-2";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.name = "violations";
+
+        checkbox.value = key;
+        checkbox.id = checkboxId;
+        checkbox.className = "mt-1 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer";
+
+        const label = document.createElement("label");
+        label.setAttribute("for", checkboxId);
+        label.className = "flex-1 text-sm";
+        label.innerHTML = `<span class="ml-2 font-medium">${penalties[key].pelanggaran}</span> <span class="text-gray-500">(Poin: - ${penalties[key].poin})</span>`;
+
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(label);
+
+        checklistContainer.appendChild(wrapper);
+  });
+
+
+
+</script>
+
 </body>
 <%- include('layout/footers/fixedFooter') %>
