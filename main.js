@@ -117,9 +117,15 @@ app.use(cookieParser());
 const csrfProtection = csurf({ cookie: true });
 app.use(csrfProtection);
 
+const postgreStore = new pgSession({
+  // check interface PGStoreOptions for more info https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/connect-pg-simple/index.d.ts
+  pool: con,
+  createTableIfMissing: true, // this will create a `session` table if you do not have it yet
+})
+
 app.use(
         session({
-                store: new pgSession(con),
+                store: postgreStore,
                 secret: process.env.SESSION_SECRET, // Gunakan secret dari .env
                 resave: false,
                 saveUninitialized: false, // Hanya simpan session jika ada perubahan
