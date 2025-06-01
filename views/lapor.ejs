@@ -1,124 +1,315 @@
-<%- include('layout/header') %>
-<%- include('layout/navs') %>
-<%- include('layout/dropdown') %>
-<body class="bg-gradient-to-b from-cyan-100 to-teal-50 m-0 md:h-full md:w-full pb-28 overflow-auto">
-    <img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full">
+<%- include('layout/header') %> <%- include('layout/navs') %> <%-
+include('layout/dropdown') %>
+<body
+  class="bg-gradient-to-b from-cyan-100 to-teal-50 m-0 md:h-full md:w-full pb-28 overflow-auto"
+>
+  <img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full" />
 
-    <div class="max-w-4xl mx-auto bg-white/70 backdrop-blur-lg p-6 shadow rounded font-poppins">
-        <h2 class="text-2xl font-bold mb-4">Buat Laporan Baru</h2>
-        
-        <form action="/lapor" method="POST" class="space-y-4" id="kex">
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        
-            <label class="block font-bold">Judul Laporan</label>
-            <input type="text" autocomplete="off" name="reportTitle" required class="border p-2 rounded w-full">
-            
-            <label class="block font-bold">Tipe Laporan</label>
-            <select name="situation" class="border p-2 rounded w-full  cursor-pointer">
-                <option value="1">🟢 Laporan Normal</option>
-                <option value="2">🟠 Laporan Perlu Perhatian</option>
-                <option value="3">🔴 Laporan Darurat</option>
-                <option value="4">⚠️  Perlu Atensi Tim Inti</option>
-                <option value="5">🔵 Perlu Atensi Pratama/i</option>
-            </select>
-            
-            <label class="block font-bold">Waktu Kejadian</label>
-            <input type="date" name="knownTimeHappened" required class="border p-2 rounded w-full">
-            
-            <label class="block font-bold">Terdakwa (Pisahkan dengan koma jika lebih dari satu)<br> <span class="text-sm font-semibold font-italic text-gray-600">PASTIKAN NAMA SAMA PERSIS DENGAN NAMA YANG ADA DI SKOR<br>Tolong perhatikan format, misal nama: Akhmal Aufa Fairuz Zaky 8E (GDP)<br>1. Setiap nama habis spasi harus huruf kapital<br>2. Setelah nama opsional ada kelas atau tidak (harus kapital, spt: 8E, 8A, 8F)<br>3. Setelah kelas, maka diberi kurung untuk menyertakan  status. WAJIB. Status:<br><span style="display:inline-block; width: 40px;"></span>1. GD - jika terdakwa adalah anggota Garuda non DP.<br><span style="display:inline-block; width: 40px;"></span>2. DPP - Jika terdakwa anggota DPP non Garuda.<br><span style="display:inline-block; width: 40px;"></span>3. GDP - Jika terdakwa anggota Garuda dan DPP.</span></label>
-            <input type="text" autocomplete="off" name="reportGuilties" class="border p-2 rounded w-full">
+  <div
+    class="max-w-4xl mx-auto bg-white/70 backdrop-blur-lg p-6 shadow rounded font-poppins"
+  >
+    <h2 class="text-2xl font-bold mb-4">Buat Laporan Baru</h2>
 
-            <!-- Buatkan -->
-            <h2 class="text-xl font-bold mr-8 mt-5 mb-2">Daftar Pelanggaran</h2>
+    <form action="/lapor" method="POST" class="space-y-4" id="kex">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <input type="hidden" name="reportGuilties" id="coyyah" value="" />
+      <label class="block font-bold">Judul Laporan</label>
+      <input
+        type="text"
+        autocomplete="off"
+        name="reportTitle"
+        required
+        class="border p-2 rounded w-full"
+      />
 
-            <div class="max-w-3xl mx-auto mt-4 pb-6">
-                <div id="penaltyChecklist" class="space-y-3"></div>
+      <label class="block font-bold">Tipe Laporan</label>
+      <select name="situation" class="border p-2 rounded w-full cursor-pointer">
+        <option value="1">🟢 Laporan Normal</option>
+        <option value="2">🟠 Laporan Perlu Perhatian</option>
+        <option value="3">🔴 Laporan Darurat</option>
+        <option value="4">⚠️ Perlu Atensi Tim Inti</option>
+        <option value="5">🔵 Perlu Atensi Pratama/i</option>
+      </select>
 
-                </div>
+      <label class="block font-bold">Waktu Kejadian</label>
+      <input
+        type="date"
+        name="knownTimeHappened"
+        required
+        class="border p-2 rounded w-full"
+      />
 
-            
-            <label class="block font-bold">Pelapor (Pisahkan dengan koma jika lebih dari satu)<br>  * Misal: Andre, Rainade, Denoin</label>
-            <input type="text" autocomplete="off" name="reportAgent" required class="border p-2 rounded w-full">
-            
-            <label class="block font-bold">Alasan & Penjelasan</label>
-            <textarea name="reportTypesAndCauses" required class="border p-2 rounded w-full h-28"></textarea>
-            
-            <div class="flex items-center">
-                <input type="checkbox" name="isPramuka" class="w-5 h-5 mr-2 cursor-pointer">
-                <label class="text-sm">Saat Pramuka?</label>
-            </div>
-            
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full" onclick="document.querySelector('#gex').disabled = true; document.querySelector('#kex').submit()" id="gex">Kirim Laporan</button>
-        </form>
+      <!-- <label class="block font-bold">Terdakwa (Pisahkan dengan koma jika lebih dari satu)<br> <span class="text-sm font-semibold font-italic text-gray-600">PASTIKAN NAMA SAMA PERSIS DENGAN NAMA YANG ADA DI SKOR<br>Tolong perhatikan format, misal nama: Akhmal Aufa Fairuz Zaky 8E (GDP)<br>1. Setiap nama habis spasi harus huruf kapital<br>2. Setelah nama opsional ada kelas atau tidak (harus kapital, spt: 8E, 8A, 8F)<br>3. Setelah kelas, maka diberi kurung untuk menyertakan  status. WAJIB. Status:<br><span style="display:inline-block; width: 40px;"></span>1. GD - jika terdakwa adalah anggota Garuda non DP.<br><span style="display:inline-block; width: 40px;"></span>2. DPP - Jika terdakwa anggota DPP non Garuda.<br><span style="display:inline-block; width: 40px;"></span>3. GDP - Jika terdakwa anggota Garuda dan DPP.</span></label>
+            <input type="text" autocomplete="off" name="reportGuilties" class="border p-2 rounded w-full"> -->
+      <div class="max-w-2xl mx-auto mt-6">
+        <h2 class="text-xl font-bold mb-4">Daftar Pelanggar</h2>
+
+        <div id="emptyMessage" class="text-center text-gray-500 py-8">
+          Belum ada pelanggar ditambahkan.
+        </div>
+
+        <ul id="violationList" class="space-y-2"></ul>
+
+        <div class="mt-6 flex gap-2">
+          <button
+            type="button"
+            onclick="openPopup()"
+            class="px-4 py-2 bg-blue-600 text-white rounded"
+          >
+            + Tambah
+          </button>
+          <button
+            type="button"
+            onclick="removeLast()"
+            id="removeBtn"
+            class="px-4 py-2 bg-red-600 text-white rounded hidden"
+          >
+            - Hapus Terakhir
+          </button>
+          <button
+            type="button"
+            onclick="clearList()"
+            id="clearBtn"
+            class="px-4 py-2 bg-gray-600 text-black rounded hidden"
+          >
+            🗑️ Bersihkan
+          </button>
+        </div>
+      </div>
+
+      <!-- Buatkan -->
+      <h2 class="text-xl font-bold mr-8 mt-5 mb-2">Daftar Pelanggaran</h2>
+
+      <div class="max-w-3xl mx-auto mt-4 pb-6">
+        <div id="penaltyChecklist" class="space-y-3"></div>
+      </div>
+
+      <label class="block font-bold"
+        >Pelapor (Pisahkan dengan koma jika lebih dari satu)<br />
+        * Misal: Andre, Rainade, Denoin</label
+      >
+      <input
+        type="text"
+        autocomplete="off"
+        name="reportAgent"
+        required
+        class="border p-2 rounded w-full"
+      />
+
+      <label class="block font-bold">Alasan & Penjelasan</label>
+      <textarea
+        name="reportTypesAndCauses"
+        required
+        class="border p-2 rounded w-full h-28"
+      ></textarea>
+
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          name="isPramuka"
+          class="w-5 h-5 mr-2 cursor-pointer"
+        />
+        <label class="text-sm">Saat Pramuka?</label>
+      </div>
+
+      <button
+        type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded w-full"
+        onclick="document.querySelector('#gex').disabled = false; muna() //document.querySelector('#kex').submit(); muantap();"
+        id="gex"
+      >
+        Kirim Laporan
+      </button>
+    </form>
+  </div>
+
+  <!-- Popup Custom -->
+  <div
+    id="popup"
+    class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50"
+  >
+    <div
+      class="bg-white w-full max-w-xl max-h-screen h-3/4 overflow-y-auto rounded-lg shadow p-6 font-manrope"
+    >
+      <h3 class="text-lg font-semibold mb-4">Pilih Anggota</h3>
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Cari nama..."
+        class="w-full mb-4 p-2 border rounded-md"
+      />
+
+      <ul id="anggotaList" class="space-y-2 max-h-64 overflow-y-auto"></ul>
+
+      <button
+        type="button"
+        onClick="closePopup()"
+        class="mt-4 text-sm text-blue-600 hover:underline"
+      >
+        Tutup
+      </button>
     </div>
-    <script>
+  </div>
 
-    document.addEventListener("contextmenu", function(e) {
-        e.preventDefault();
-    });
-    document.addEventListener("keydown", function(e) {
-        // F12
-        if (e.key === "F12") e.preventDefault();
-
-        // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
-        if (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key.toUpperCase())) {
-            e.preventDefault();
-        }
-
-        // Ctrl+U (View Source)
-        if (e.ctrlKey && e.key.toLowerCase() === "u") {
-            e.preventDefault();
-        }
-        // Ctrl+S (Save Page)
-        if (e.ctrlKey && e.key.toLowerCase() === "s") {
-            e.preventDefault();
-        }
-        // Ctrl+Shift+S (Save As)  
-        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
-            e.preventDefault();
-        } });
-
-
-
-
+  <script>
     function decodeHtmlEntity(encodedString) {
-        const doc = new DOMParser().parseFromString(encodedString, 'text/html');
-        return doc.documentElement.textContent || doc.body.textContent;
+      const doc = new DOMParser().parseFromString(encodedString, "text/html");
+      return doc.documentElement.textContent || doc.body.textContent;
+    }
+
+
+
+    const anggotaPramuka = JSON.parse(decodeHtmlEntity("<%= names %>"));
+    const violationList = document.getElementById("violationList");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const removeBtn = document.getElementById("removeBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const popup = document.getElementById("popup");
+    const anggotaList = document.getElementById("anggotaList");
+    let fullListItems = []; // cache semua li
+    let yota = [];
+    function refreshUI() {
+      const hasItem = violationList.children.length > 0;
+      emptyMessage.classList.toggle("hidden", hasItem);
+      removeBtn.classList.toggle("hidden", !hasItem);
+      clearBtn.classList.toggle("hidden", !hasItem);
+    }
+
+    function getAddedNames() {
+      let ligma = []
+      let _Cache = ""
+      let _Iteration = 0
+      Array.from(violationList.children).map((li) =>
+	{
+	  li.querySelector("span").textContent.trim()
+
+	  for(let lc of li.querySelectorAll('span')){
+		if(_Iteration == 1) {
+
+			ligma.push(`${_Cache} (${(lc.textContent== "GARUDA & DPP" ? "GDP" : lc.textContent == "GARUDA" ? "GD" : "DPP")})`)
+			_Iteration = 0;
+			continue
+		}
+		_Cache = lc.textContent;
+		_Iteration++;
+	  }
+	  
+	}
+      );
+      return ligma;
+
+    }
+
+    function openPopup() {
+      anggotaList.innerHTML = "";
+      fullListItems = []; // kosongkan cache
+      const alreadyAdded = new Set(getAddedNames());
+
+      anggotaPramuka.forEach((anggota) => {
+        if (alreadyAdded.has(anggota.nama)) return; // skip yang sudah ada
+
+        const li = document.createElement("li");
+        li.className =
+          "flex justify-between items-center p-2 bg-gray-100 rounded hover:bg-gray-200 cursor-pointer";
+        li.innerHTML = `
+      <span>${anggota.nama}</span>
+      <span class="text-xs text-gray-500">${anggota.status == "GDP" ? "GARUDA & DPP" : anggota.status == "GD" ? "GARUDA" : "DPP"}</span>
+    `;
+        li.onclick = () => {
+          addToList(anggota);
+          closePopup();
+        };
+        anggotaList.appendChild(li);
+        fullListItems.push({ element: li, nama: anggota.nama.toLowerCase() });
+      });
+
+      popup.classList.remove("hidden");
+      popup.classList.remove("opacity-0");
+      popup.classList.remove("pointer-events-none");
+      document.getElementById("searchInput").value = "";
+    }
+
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      const keyword = e.target.value.toLowerCase();
+
+      anggotaList.innerHTML = "";
+
+      fullListItems
+        .filter((item) => item.nama.includes(keyword))
+        .forEach((item) => anggotaList.appendChild(item.element));
+    });
+
+    function closePopup() {
+      popup.classList.add("hidden");
+      popup.classList.add("pointer-events-none");
+      popup.classList.add("opacity-0");
+    }
+
+    function addToList(anggota) {
+      const li = document.createElement("li");
+      li.className =
+        "flex justify-between items-center bg-white px-3 py-2 rounded shadow";
+      li.innerHTML = `
+    <span class="font-medium">${anggota.nama}</span>
+    <span class="text-sm text-gray-600">${anggota.status == "GDP" ? "GARUDA & DPP" : anggota.status == "GD" ? "GARUDA" : "DPP"}</span>
+  `;
+      violationList.appendChild(li);
+      refreshUI();
+    }
+
+    function removeLast() {
+      if (violationList.lastChild) {
+        violationList.removeChild(violationList.lastChild);
+        refreshUI();
+      }
+    }
+
+    function clearList() {
+      violationList.innerHTML = "";
+      refreshUI();
+    }
+
+    document.getElementById("kex").addEventListener("submit", (e) => {
+      e.preventDefault();
+      //(alreadyAdded);
+    });
+
+    // Submit Function
+    function muna (){
+      document.getElementById('coyyah').value = getAddedNames().join(', ')
+      document.getElementById('kex').submit()
     }
 
     const penalties = JSON.parse(decodeHtmlEntity("<%= penalties %>"));
     const checklistContainer = document.getElementById("penaltyChecklist");
 
     let index = 0;
-    Object.keys(penalties).forEach(key => {
-        index++;
-        const checkboxId = `violation-${index}`;
+    Object.keys(penalties).forEach((key) => {
+      index++;
+      const checkboxId = `violation-${index}`;
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "flex items-start gap-2";
+      const wrapper = document.createElement("div");
+      wrapper.className = "flex items-start gap-2";
 
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.name = "violations";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.name = "violations";
 
-        checkbox.value = key;
-        checkbox.id = checkboxId;
-        checkbox.className = "mt-1 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer";
+      checkbox.value = key;
+      checkbox.id = checkboxId;
+      checkbox.className =
+        "mt-1 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer";
 
-        const label = document.createElement("label");
-        label.setAttribute("for", checkboxId);
-        label.className = "flex-1 text-sm";
-        label.innerHTML = `<span class="ml-2 font-medium">${penalties[key].pelanggaran}</span> <span class="text-gray-500">(Poin: - ${penalties[key].poin})</span>`;
+      const label = document.createElement("label");
+      label.setAttribute("for", checkboxId);
+      label.className = "flex-1 text-sm";
+      label.innerHTML = `<span class="ml-2 font-medium">${penalties[key].pelanggaran}</span> <span class="text-gray-500">(Poin: - ${penalties[key].poin})</span>`;
 
-        wrapper.appendChild(checkbox);
-        wrapper.appendChild(label);
+      wrapper.appendChild(checkbox);
+      wrapper.appendChild(label);
 
-        checklistContainer.appendChild(wrapper);
-  });
-
-
-
-</script>
-
+      checklistContainer.appendChild(wrapper);
+    });
+  </script>
 </body>
 <%- include('layout/footers/fixedFooter') %>

@@ -1,48 +1,38 @@
 <%- include("layout/header") %>
-<body class="bg-gradient-to-b from-cyan-100 to-teal-50 p-0 m-0 md:h-full md:w-full">
-    <img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full">
-<div class="min-h-screen flex items-center justify-center p-4">
-  <div class="bg-white/70 backdrop-blur-md shadow-lg rounded-lg p-6 w-full max-w-2xl">
-    <h2 class="text-2xl font-bold mb-4 text-gray-700">Edit Data</h2>
 
-    <form action="/edit/<%= data.uid %>" method="POST" class="space-y-4">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <!-- UID -->
-      <div>
-        <label class="block text-gray-600">UID</label>
-        <input
-          type="text"
-          name="uid"
-          value="<%= data.uid %>"
-          readonly
-          class="w-full px-3 py-2 border rounded bg-gray-100 text-gray-500 cursor-not-allowed"
-        />
-      </div>
+	<body class="bg-gradient-to-b from-cyan-100 to-teal-50 p-0 m-0 md:h-full md:w-full">
+		<img src="/images/landscape.png" alt="" class="-z-10 fixed bottom-0 w-full">
+		<div class="min-h-screen flex items-center justify-center p-4">
+			<div class="bg-white/70 backdrop-blur-md shadow-lg rounded-lg p-6 w-full max-w-2xl">
+				<h2 class="text-2xl font-bold mb-4 text-gray-700">Edit Data</h2>
 
-      <!-- Nama Laporan -->
-      <div>
-        <label class="block text-gray-600">Nama Laporan</label>
-        <input
-          type="text"
-          name="reportTitle"
-          value="<%= data.reporttitle %>"
-          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-      </div>
+				<form action="/edit/<%= data.uid %>" method="POST" id="kez" class="space-y-4">
+					<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+					<input type="hidden" name="reportguilties" id="coyyah" value="" />
+					<!-- UID -->
+					<div>
+						<label class="block text-gray-600">UID</label>
+						<input type="text" name="uid" value="<%= data.uid %>" readonly
+							class="w-full px-3 py-2 border rounded bg-gray-100 text-gray-500 cursor-not-allowed" />
+					</div>
 
-      <!-- Waktu Kejadian -->
-      <div>
-        <label class="block text-gray-600">Waktu Kejadian</label>
-        <input
-          type="date"
-          name="knownTimeHappened"
-          value="<%= data.knowntimehappened %>"
-          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-      </div>
+					<!-- Nama Laporan -->
+					<div>
+						<label class="block text-gray-600">Nama Laporan</label>
+						<input type="text" name="reportTitle" value="<%= data.reporttitle %>"
+							class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+					</div>
 
-      <!-- Terdakwa -->
-      <div>
+					<!-- Waktu Kejadian -->
+					<div>
+						<label class="block text-gray-600">Waktu Kejadian</label>
+						<input type="date" name="knownTimeHappened"
+							value="<%= data.knowntimehappened %>"
+							class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+					</div>
+
+					<!-- Terdakwa -->
+					<!--<div>
         <label class="block text-gray-600">Terdakwa</label>
         <input
           type="text"
@@ -50,56 +40,334 @@
           value="<%= data.reportguilties %>"
           class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
-      </div>
+      </div><-->
 
-      <!-- Pelapor -->
-      <div>
-        <label class="block text-gray-600">Pelapor</label>
-        <input
-          type="text"
-          name="reportAgent"
-          value="<%= data.reportagent %>"
-          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-      </div>
+					<div class="max-w-2xl mx-auto mt-6">
+						<h2 class="text-xl font-bold mb-4">Daftar Pelanggar</h2>
 
-      <!-- Alasan -->
-      <div>
-        <label class="block text-gray-600">Alasan</label>
-        <textarea
-          name="reportTypesAndCauses"
-          class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        ><%= data.reporttypesandcauses %></textarea>
-      </div>
+						<div id="emptyMessage" class="text-center text-gray-500 py-8">
+							Belum ada pelanggar ditambahkan.
+						</div>
 
-      <!-- Dropdown Situasi -->
-      <div>
-        <label class="block text-gray-600">Situasi</label>
-        <select name="situation" class="w-full px-3 py-2 border  cursor-pointer rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            <option value="1" <%= Number(data.uid.split('/')[2]) === 1 ? 'selected' : '' %>>🟢 Laporan Normal</option>
-            <option value="2" <%= Number(data.uid.split('/')[2]) === 2 ? 'selected' : '' %>>🟠 Laporan Perlu Perhatian</option>
-            <option value="3" <%= Number(data.uid.split('/')[2]) === 3 ? 'selected' : '' %>>🔴 Laporan Darurat</option>
-            <option value="4" <%= Number(data.uid.split('/')[2]) === 4 ? 'selected' : '' %>>⚠️ Perlu Atensi Tim Inti</option>
-            <option value="5" <%= Number(data.uid.split('/')[2]) === 5 ? 'selected' : '' %>>🔵 Perlu Atensi Pratama/i</option>
-            </option>
+						<ul id="violationList" class="space-y-2"></ul>
 
-        </select>
-      </div>
+						<div class="mt-6 flex gap-2">
+							<button type="button" onclick="openPopup()"
+								class="px-4 py-2 bg-blue-600 text-white rounded">
+								+ Tambah
+							</button>
+							<button type="button" onclick="removeLast()" id="removeBtn"
+								class="px-4 py-2 bg-red-600 text-white rounded hidden">
+								- Hapus Terakhir
+							</button>
+							<button type="button" onclick="clearList()" id="clearBtn"
+								class="px-4 py-2 bg-gray-600 text-black rounded hidden">
+								🗑️ Bersihkan
+							</button>
+						</div>
+					</div>
 
-      <!-- Checkbox Saat Pramuka -->
-      <div class="flex items-center">
-        <input type="checkbox" name="isScoutEvent" id="isScoutEvent"
-        class="mr-2" <%= data.isonpramday ? 'checked' : '' %>>
-        <label for="isScoutEvent" class="text-sm font-medium  cursor-pointer">Saat Pramuka?</label>
-      </div>
+					<!-- Flag section -->
+					<h2 class="text-xl font-bold mr-8 mt-5 mb-2">Daftar Pelanggaran</h2>
 
-      <!-- Tombol Submit -->
-      <div class="flex justify-end space-x-2">
-        <a href="/dashboard" class="px-4 py-2 bg-gray-300 text-gray-700 rounded no-underline hover:bg-gray-400 transition">Batal</a>
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-          Simpan
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+					<div class="max-w-3xl mx-auto mt-4 pb-6">
+						<div id="penaltyChecklist" class="space-y-3"></div>
+					</div>
+
+
+
+					<!-- Pelapor -->
+					<div>
+						<label class="block text-gray-600">Pelapor</label>
+						<input type="text" name="reportAgent" value="<%= data.reportagent %>"
+							class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+					</div>
+
+					<!-- Alasan -->
+					<div>
+						<label class="block text-gray-600">Alasan</label>
+						<textarea name="reportTypesAndCauses"
+							class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"><%= data.reporttypesandcauses %></textarea>
+					</div>
+
+					<!-- Dropdown Situasi -->
+					<div>
+						<label class="block text-gray-600">Situasi</label>
+						<select name="situation"
+							class="w-full px-3 py-2 border  cursor-pointer rounded focus:ring-2 focus:ring-blue-500 focus:outline-none">
+							<option value="1" <%=Number(data.uid.split('/')[2])===1
+								? 'selected' : '' %>>🟢 Laporan Normal</option>
+							<option value="2" <%=Number(data.uid.split('/')[2])===2
+								? 'selected' : '' %>>🟠 Laporan Perlu Perhatian</option>
+							<option value="3" <%=Number(data.uid.split('/')[2])===3
+								? 'selected' : '' %>>🔴 Laporan Darurat</option>
+							<option value="4" <%=Number(data.uid.split('/')[2])===4
+								? 'selected' : '' %>>⚠️ Perlu Atensi Tim Inti</option>
+							<option value="5" <%=Number(data.uid.split('/')[2])===5
+								? 'selected' : '' %>>🔵 Perlu Atensi Pratama/i</option>
+							</option>
+
+						</select>
+					</div>
+
+					<!-- Checkbox Saat Pramuka -->
+					<div class="flex items-center">
+						<input type="checkbox" name="isScoutEvent" id="isScoutEvent"
+							class="mr-2" <%=data.isonpramday ? 'checked' : '' %>>
+						<label for="isScoutEvent"
+							class="text-sm font-medium  cursor-pointer">Saat
+							Pramuka?</label>
+					</div>
+
+					<!-- Tombol Submit -->
+					<div class="flex justify-end space-x-2">
+						<a href="/dashboard"
+							class="px-4 py-2 bg-gray-300 text-gray-700 rounded no-underline hover:bg-gray-400 transition">Batal</a>
+						<button type="submit"
+							class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+							Simpan
+						</button>
+					</div>
+				</form>
+			</div>
+
+			<div id="popup" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
+				<div
+					class="bg-white w-full max-w-xl max-h-screen h-3/4 overflow-y-auto rounded-lg shadow p-6 font-manrope">
+					<h3 class="text-lg font-semibold mb-4">Pilih Anggota</h3>
+					<input id="searchInput" type="text" placeholder="Cari nama..."
+						class="w-full mb-4 p-2 border rounded-md" />
+
+					<ul id="anggotaList" class="space-y-2 max-h-64 overflow-y-auto"></ul>
+
+					<button type="button" onClick="closePopup()"
+						class="mt-4 text-sm text-blue-600 hover:underline">
+						Tutup
+					</button>
+				</div>
+			</div>
+
+
+			<script>
+
+				function decodeHtmlEntity(encodedString) {
+					const doc = new DOMParser().parseFromString(encodedString, "text/html");
+					return doc.documentElement.textContent || doc.body.textContent;
+				}
+
+
+
+				const anggotaPramuka = JSON.parse(decodeHtmlEntity("<%= names %>"));
+				const violationList = document.getElementById("violationList");
+				const emptyMessage = document.getElementById("emptyMessage");
+				const removeBtn = document.getElementById("removeBtn");
+				const clearBtn = document.getElementById("clearBtn");
+				const popup = document.getElementById("popup");
+				const anggotaList = document.getElementById("anggotaList");
+				const violationstype = "<%= data.tipepelanggaran %>";
+				let fullListItems = []; // cache semua li
+
+
+				function refreshUI() {
+					const hasItem = violationList.children.length > 0;
+					emptyMessage.classList.toggle("hidden", hasItem);
+					removeBtn.classList.toggle("hidden", !hasItem);
+					clearBtn.classList.toggle("hidden", !hasItem);
+				}
+
+				function getAddedNames() {
+					let ligma = []
+					let _Cache = ""
+					let _Iteration = 0
+					Array.from(violationList.children).map((li) => {
+						li.querySelector("span").textContent.trim()
+
+						for (let lc of li.querySelectorAll('span')) {
+							if (_Iteration == 1) {
+
+
+								ligma.push(`${_Cache} (${(lc.textContent== "GARUDA & DPP" ? "GDP" : lc.textContent == "GARUDA" ? "GD" : "DPP")})`)
+								_Iteration = 0;
+								continue
+							}
+							_Cache = lc.textContent;
+							_Iteration++;
+						}
+
+					}
+					);
+					return ligma;
+
+				}
+
+				function openPopup() {
+					anggotaList.innerHTML = "";
+					fullListItems = []; // kosongkan cache
+					const alreadyAdded = new Set(getAddedNames());
+
+					anggotaPramuka.forEach((anggota) => {
+						if (alreadyAdded.has(anggota.nama)) return; // skip yang sudah ada
+
+						const li = document.createElement("li");
+						li.className =
+							"flex justify-between items-center p-2 bg-gray-100 rounded hover:bg-gray-200 cursor-pointer";
+						li.innerHTML = `
+      <span>${anggota.nama}</span>
+      <span class="text-xs text-gray-500">${anggota.status == "GDP" ? "GARUDA & DPP" : anggota.status == "GD" ? "GARUDA" : "DPP"}</span>
+    `;
+						li.onclick = () => {
+							addToList(anggota);
+							closePopup();
+						};
+						anggotaList.appendChild(li);
+						fullListItems.push({element: li, nama: anggota.nama.toLowerCase()});
+					});
+
+					popup.classList.remove("hidden");
+					popup.classList.remove("opacity-0");
+					popup.classList.remove("pointer-events-none");
+					document.getElementById("searchInput").value = "";
+				}
+
+				document.getElementById("searchInput").addEventListener("input", (e) => {
+					const keyword = e.target.value.toLowerCase();
+
+					anggotaList.innerHTML = "";
+
+					fullListItems
+						.filter((item) => item.nama.includes(keyword))
+						.forEach((item) => anggotaList.appendChild(item.element));
+				});
+
+				function closePopup() {
+					popup.classList.add("hidden");
+					popup.classList.add("pointer-events-none");
+					popup.classList.add("opacity-0");
+				}
+
+				function addToList(anggota) {
+					const li = document.createElement("li");
+					li.className =
+						"flex justify-between items-center bg-white px-3 py-2 rounded shadow";
+					li.innerHTML = `
+    <span class="font-medium">${anggota.nama}</span>
+    <span class="text-sm text-gray-600">${anggota.status == "GDP" ? "GARUDA & DPP" : anggota.status == "GD" ? "GARUDA" : "DPP"}</span>
+  `;
+					violationList.appendChild(li);
+					refreshUI();
+				}
+
+				function removeLast() {
+					if (violationList.lastChild) {
+						violationList.removeChild(violationList.lastChild);
+						refreshUI();
+					}
+				}
+
+				function clearList() {
+					violationList.innerHTML = "";
+					refreshUI();
+				}
+
+
+
+				document.addEventListener('DOMContentLoaded', e => {
+					let rg = "<%= data.reportguilties %>"
+					const parsed = rg.split(",").map(item => {
+						const match = item.trim().match(/^(.+?)\s*\(([^)]+)\)$/);
+						if (!match) return null;
+
+						return {
+							nama: match[1].trim(),
+							status: match[2].trim()
+						};
+					}).filter(Boolean); // buang null jika ada format tidak cocok
+
+					//console.log(parsed)
+					for (let par of parsed) {
+						addToList(par)
+					}
+					//console.log(`Coyyah: ${violationstype}`)
+
+					let results = violationstype.includes(",") ? violationstype.split(",").map(v => v.trim()) : [violationstype.trim()];
+					//console.log(results)
+					for (let result of results) {
+						const inputs = document.querySelectorAll('input');
+						const target = Array.from(inputs).find(input => input.value.trim() == result.trim());
+						//console.log(result)
+						target.checked = true;
+					}
+				})
+
+				//document.dispatchEvent(new Event('init'));
+				// Submit Function
+
+				const csrfToken = document.querySelector('input[name="_csrf"]').content;
+				document.getElementById("kez").addEventListener("submit", function (e) {
+					e.preventDefault();
+					document.getElementById('coyyah').value = getAddedNames().join(', ')
+					const Fdata = new FormData(this);
+
+
+					const semuaTercentang = Array.from(document.getElementsByName("violations"))
+						.filter(cb => cb.checked);
+
+					let _na = []
+					for (let p of semuaTercentang) {
+						_na.push(p.value)
+					}
+
+
+
+					Fdata.append("n_vio", _na.join(', '));
+
+					const data = Object.fromEntries(Fdata);
+					fetch("/edit/<%= data.uid %>", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"CSRF-Token": csrfToken // default header yang csurf cari
+						},
+						body: JSON.stringify(data)
+					}).then(res => {
+						window.location.href = '/dashboard'; // Harus kamu lakukan sendiri
+					})
+					//console.log("EEE")
+				})
+
+				const penalties = JSON.parse(decodeHtmlEntity("<%= penalties %>"));
+				const checklistContainer = document.getElementById("penaltyChecklist");
+
+				let index = 0;
+				Object.keys(penalties).forEach((key) => {
+					index++;
+					const checkboxId = `violation-${index}`;
+
+					const wrapper = document.createElement("div");
+					wrapper.className = "flex items-start gap-2";
+
+					const checkbox = document.createElement("input");
+					checkbox.type = "checkbox";
+					checkbox.name = "violations";
+
+					checkbox.value = key;
+					checkbox.id = checkboxId + " checkbox-pen";
+					checkbox.className =
+						"mt-1 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded-lg focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer";
+
+					const label = document.createElement("label");
+					label.setAttribute("for", checkboxId);
+					label.className = "flex-1 text-sm";
+					label.innerHTML = `<span class="ml-2 font-medium">${penalties[key].pelanggaran}</span> <span class="text-gray-500">(Poin: - ${penalties[key].poin})</span>`;
+
+					wrapper.appendChild(checkbox);
+					wrapper.appendChild(label);
+
+					checklistContainer.appendChild(wrapper);
+				});
+
+
+
+			</script>
+
+	</body>

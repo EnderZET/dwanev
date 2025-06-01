@@ -4,7 +4,7 @@ class="sticky bg-gray-800 pb-10 bottom-0  w-full h-36"
 > -->
 <footer class="sticky bottom-0 md:bottom-0 w-full bg-gray-800 text-white text-center p-4">
 
-  &copy; 2025 Dewan Evaluasi. Please read About Page for Copyright issues. <a class="bold underline text-blue-400" href="/logout">Logout?</a>
+  &copy; 2025 Dewan Evaluasi. Please read About Page for Copyright issues. <% if(typeof _prohibitLogout === 'undefined' || !_prohibitLogout) { %><a class="bold underline text-blue-400" href="/logout">Logout?</a><% } %>
 </footer>
 
 <script src="/javascripts/scripts.js"></script>

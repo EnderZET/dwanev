@@ -1,54 +1,40 @@
+<!-- component -->
+<!-- component -->
+<nav class="w-full flex relative justify-between items-center mx-auto px-8 h-20 bg-transparent">
+	<!-- logo -->
+	<div class="inline-flex z-10">
+		<a class="_o6689fn" href="/">
+			<div class="hidden md:block">
+				<img src="/images/logo2.png" alt="" width="150" height="60" fill="currentcolor"
+					class="">
+			</div>
+			<div class="block md:hidden">
+				<img src='/images/logo2.png' width="100" height="102" fill="currentcolor"
+					style="display: block">
+
+			</div>
+		</a>
+	</div>
+
+	<!-- end logo -->
+
+	<!-- search bar -->
 
 
-
-    <!-- component -->
-    <!-- component -->
-    <nav
-      class="w-full flex relative justify-between items-center mx-auto px-8 h-20 bg-transparent"
-    >
-      <!-- logo -->
-      <div class="inline-flex z-10">
-        <a class="_o6689fn" href="/">
-          <div class="hidden md:block">
-            <img src="/images/logo2.png" alt="" width="150" height="60" fill="currentcolor" class="">
-          </div>
-          <div class="block md:hidden">
-            <img src='/images/logo2.png'
-
-              width="100"
-              height="102"
-              fill="currentcolor"
-              style="display: block"
-            >
-  
-          </div>
-        </a>
-      </div>
-
-      <!-- end logo -->
-
-      <!-- search bar -->
-  
-
-      <!-- login -->
-      <div class="flex-initial">
-        <div class="flex justify-end items-center relative">
-          <div class="flex mr-4 items-center">
-            <div class="block">
-              <div class="inline relative">
-                <button
-                  type="button"
-                  class="inline-flex items-center relative left-8 px-2 h-10 w-10 rounded-full hover:shadow-lg"
-                  onclick="<%= (typeof perm !== 'undefined' && perm === 'admin') ? 'toggleDropdown()' : 'toggleDropdown2()' %> "
-                >
-                  <div class="pl-1">
-                    <svg
-                      viewBox="0 0 32 32"
-                      xmlns="http://www.w3.org/2000/svg"
-                      aria-hidden="true"
-                      role="presentation"
-                      focusable="false"
-                      style="
+	<!-- login -->
+	<div class="flex-initial">
+		<div class="flex justify-end items-center relative">
+			<div class="flex mr-4 items-center">
+				<div class="block">
+					<div class="inline relative">
+						<button type="button"
+							class="inline-flex items-center relative left-8 px-2 h-10 w-10 rounded-full hover:shadow-lg"
+							onclick="<%= (typeof perm !== 'undefined' && perm == 'omega3') ? 'toggleDropdown()' : 'toggleDropdown2()' %> ">
+							<div class="pl-1">
+								<svg viewBox="0 0 32 32"
+									xmlns="http://www.w3.org/2000/svg"
+									aria-hidden="true" role="presentation"
+									focusable="false" style="
                         display: block;
                         fill: none;
                         height: 16px;
@@ -56,17 +42,16 @@
                         stroke: currentcolor;
                         stroke-width: 3;
                         overflow: visible;
-                      "
-                    >
-                      <g fill="none" fill-rule="nonzero">
-                        <path d="m2 16h28"></path>
-                        <path d="m2 24h28"></path>
-                        <path d="m2 8h28"></path>
-                      </g>
-                    </svg>
-                  </div>
+                      ">
+									<g fill="none" fill-rule="nonzero">
+										<path d="m2 16h28"></path>
+										<path d="m2 24h28"></path>
+										<path d="m2 8h28"></path>
+									</g>
+								</svg>
+							</div>
 
-                  <!-- <div class="block flex-grow-0 flex-shrink-0 h-10 w-12 pl-5">
+							<!-- <div class="block flex-grow-0 flex-shrink-0 h-10 w-12 pl-5">
                   <svg
                     viewBox="0 0 32 32"
                     xmlns="http://www.w3.org/2000/svg"
@@ -85,12 +70,11 @@
                     ></path>
                   </svg>
                 </div> -->
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- end login -->
-    </nav>
-    
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- end login -->
+</nav>

@@ -15,6 +15,8 @@ function formatDate(dateString) {
     });
 }
 
+
+
 %>
 <body class="bg-gradient-to-br from-blue-100 via-teal-100 to-blue-200  p-0 m-0 md:h-full md:w-full">
     
@@ -108,8 +110,8 @@ function formatDate(dateString) {
                         <td class="border p-2 w-32"><%= dat.reporttitle %></td>
                         <td class="border p-2 w-48"><%= typeoflap %></td>
                         <td class="border p-2"><%= dat.knowntimehappened %></td>
-                        <td class="border p-2 break-words"><%- '• ' + dat.reportguilties.replace('\n','').split(',').join('<br>• ') %></td>
-                        <td class="border p-2 break-words"><%- '• ' + dat.reportagent.replace('\n','').split(',').join('<br>• ') %></td>
+                        <td class="border p-2 break-words w-48"><%- '• ' + dat.reportguilties.split(',').join('<br>• ') %></td>
+                        <td class="border p-2 break-words"><%- '• ' + dat.reportagent.split(',').join('<br>• ')  %></td>
                         <td class="border p-2 w-56 break-words"><%= dat.reporttypesandcauses %></td>
                         <td class="border p-2 text-center"><%= dat.isonpramday ? "✅" : "❌" %></td>
                         <td class="border p-2 text-center"><%= dat.isverified ? "✅" : "❌" %></td>
@@ -117,12 +119,19 @@ function formatDate(dateString) {
                         <td class="border p-2"><%= formatDate(dat.uploadtime) %></td>
                         <td class="border p-2"><%= (dat.isedited) ? formatDate(dat.edittime) : "Belum di-Edit" %></td>
                         <td class="border p-2 flex flex-col gap-4">
-                            <a href="/edit/<%= dat.uid %>" class="bg-yellow-700 text-white px-2 py-1 rounded text-xs h-8 w-full text-center leading-6 no-underline">Edit</a>
+                            
+			    
                             <% if (!dat.isverified) { %>
+			    	<a href="/edit/<%= dat.uid %>" class="bg-yellow-700 text-white px-2 py-1 rounded text-xs h-8 w-full text-center leading-6 no-underline">Edit</a>
                                 <form id="verifyForm" action="/verify" method="POST" onsubmit="return openVerifyModal(event)">
                                 <input type="hidden" name="_csrf" id="csrfToken" value="<%= csrfToken %>">
                                 <input type="hidden" name="uid" value="<%= dat.uid %>">
                                 <button type="submit" class="bg-green-700 text-white px-2 py-1 rounded text-xs h-8 w-full ">Verifikasi</button>
+                            </form>
+			                                <form action="/delete" method="post" onsubmit="confirmDelete(event, this)">
+                                <input type="hidden" name="_csrf" id="csrfToken" value="<%= csrfToken %>">
+                                <input type="hidden" name="uid" value="<%= dat.uid %>">
+                                <button type="submit"  class="bg-red-500 text-white px-2 py-1 rounded text-xs h-8 w-full ">Hapus</button>
                             </form>
                             <% }else{ %>
                             <form id="verifyForm" action="/unverify" method="POST" onsubmit="confirmDelete(event, this)">
@@ -132,11 +141,7 @@ function formatDate(dateString) {
                             </form>
                             <% } %>
 
-                            <form action="/delete" method="post" onsubmit="confirmDelete(event, this)">
-                                <input type="hidden" name="_csrf" id="csrfToken" value="<%= csrfToken %>">
-                                <input type="hidden" name="uid" value="<%= dat.uid %>">
-                                <button type="submit"  class="bg-red-500 text-white px-2 py-1 rounded text-xs h-8 w-full ">Hapus</button>
-                            </form>
+
                         </td>
                     </tr>
                     <% }) %>
@@ -199,7 +204,7 @@ function formatDate(dateString) {
 <div id="verifyModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center">
         <h2 class="text-lg font-semibold">Konfirmasi Verifikasi</h2>
-        <p class="text-sm text-gray-600 mt-2">Ketik kalimat berikut untuk konfirmasi:</p>
+        <p class="text-sm text-gray-600 mt-2">Ketik kalimat berikut untuk konfirmasi (Setelah verifikasi maka laporan tidak akan bisa dihapus dan diedit lagi. Lakukan deverifikasi untuk mengaktifkan fungsi hapus dan edit):</p>
         <p class="font-bold mt-1">"ISTG VRO JUST SUBMIT TS"</p>
 
         <input type="text" id="verifyInput" class="border p-2 w-full mt-3 text-center rounded-md" placeholder="Ketik di sini..." />
